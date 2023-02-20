@@ -41,24 +41,33 @@ else:
 
 keys = scan_result.keys()
 
-df = pd.DataFrame(columns=['host', 'CVE'])
+df = pd.DataFrame(columns=['host', 'CVE', 'CVSS'])
 df['CVE'] = df['CVE'].astype(object)
 
 i = 0
 
 for key in keys:
     raw_str = str(scan_result[key])
-    matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
+    cve_matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
 
-    formatted_matches = []
-    for match in matches:
+    formatted_cve_matches = []
+    for match in cve_matches:
         match = match.replace('[','')
-        formatted_matches.append(match)
+        formatted_cve_matches.append(match)
     
-    formatted_matches = np.unique(formatted_matches)
+    formatted_cve_matches = np.unique(formatted_cve_matches)
+
+    cvss_matches = re.findall('Base Score \d{1}.\d{1}', raw_str)
     
+    cvss_scores = []
+
+    for match in cvss_matches:
+        match = match.split(' ')[2]
+        cvss_scores.append(match)
+
     df.at[i, 'host'] = key
-    df.at[i, 'CVE'] = formatted_matches.tolist()
+    df.at[i, 'CVE'] = formatted_cve_matches.tolist()
+    df.at[i, 'CVSS'] = cvss_scores
 
     i+=1
 
