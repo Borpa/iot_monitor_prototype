@@ -3,10 +3,20 @@
 #https://cve.mitre.org/data/downloads/
 
 import nmap
-import json
 import pandas as pd
+import re
+import numpy as np
+import pickle
+import os
 
-nm = nmap.PortScanner()
+def save_object(obj, filename):
+    with open(filename, 'wb') as outp:
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
+def load_object(filename):
+    with open(filename, 'rb') as inp:
+        return pickle.load(inp)
+
 #scan_range = nm.scan(hosts = "2400:2650:78c5:1200:608b:ea8f:a3f:aeda",
 #                     arguments="-6 -sV")
 
@@ -19,21 +29,45 @@ nm = nmap.PortScanner()
 #host_list = nm.scan(hosts="192.168.3.1/24",
 #                     arguments="-sV -O -Pn")
 
-scan_range = nm.scan(hosts = "192.168.3.12",
-                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
+    
+if (os.path.exists('scan_result.pkl')):
+    scan_result = load_object('scan_result.pkl')
+else:
+    nm = nmap.PortScanner()
+    scan_range = nm.scan(hosts = "192.168.3.1 192.168.3.12",
+                         arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
+    scan_result = scan_range['scan']
+    save_object(scan_result, 'scan_result.pkl')
 
-#scan_result = scan_range['scan']
+keys = scan_result.keys()
 
+df = pd.DataFrame(columns=['host', 'CVE'])
 
-jsondata = json.dumps(scan_range['scan'], indent = 10) 
-print(jsondata)
+i = 0
 
-#df = pd.read_csv(nm.csv())
+df['CVE'] = df['CVE'].astype(object)
 
-df = pd.read_json(jsondata)
+for key in keys:
+    raw_str = str(scan_result[key])
+    matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
 
+    formatted_matches = []
+    for match in matches:
+        match = match.replace('[','')
+        formatted_matches.append(match)
+    
+    formatted_matches = np.unique(formatted_matches)
+    
+    df.at[i, 'host'] = key
+    df.at[i, 'CVE'] = formatted_matches.tolist()
+
+    i+=1
+
+print(df)
 df.to_csv("scan.csv")
 df.to_json("scan.json")
+
+#matches = re.findall('\[CVE-\d{4}-\d{4}.*]', raw_str)
 
 #https://www.cve.org/CVERecord?id=
 #https://nvd.nist.gov/vuln/detail/CVE-
