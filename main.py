@@ -42,10 +42,9 @@ else:
 keys = scan_result.keys()
 
 df = pd.DataFrame(columns=['host', 'CVE'])
+df['CVE'] = df['CVE'].astype(object)
 
 i = 0
-
-df['CVE'] = df['CVE'].astype(object)
 
 for key in keys:
     raw_str = str(scan_result[key])
