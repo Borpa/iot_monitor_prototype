@@ -30,7 +30,7 @@ def __loadObject(filename):
 #                     arguments="-sV -O -Pn")
 
 
-def __loadScanObject(): 
+def __loadScanResultObject(): 
     if (os.path.exists('scan_result.pkl')):
         scan_result = __loadObject('scan_result.pkl')
         return scan_result
@@ -42,13 +42,19 @@ def __loadScanObject():
         __saveObject(scan_result, 'scan_result.pkl')
         return scan_result
 
-def scan(hostS):
+def discoverHosts(network):
+    return ""
+
+def scanV6(hostS):
+    return ""
+
+def scan(hostS): # settings? v6 etc. 
     #nm = nmap.PortScanner()
     #scan_range = nm.scan(hosts = hostS,
     #                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
     #scan_result = scan_range['scan']
 
-    scan_result = __loadScanObject()
+    scan_result = __loadScanResultObject()
 
     keys = scan_result.keys()
 
@@ -59,19 +65,16 @@ def scan(hostS):
 
     for key in keys:
         raw_str = str(scan_result[key])
-        cve_matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
 
+        cve_matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
         formatted_cve_matches = []
         for match in cve_matches:
             match = match.replace('[','')
             formatted_cve_matches.append(match)
-
         formatted_cve_matches = np.unique(formatted_cve_matches)
-
+        
         cvss_matches = re.findall('Base Score \d{1}.\d{1}', raw_str)
-
         cvss_scores = []
-
         for match in cvss_matches:
             match = match.split(' ')[2]
             cvss_scores.append(match)
