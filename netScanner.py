@@ -9,11 +9,11 @@ import numpy as np
 import pickle
 import os
 
-def __saveObject(obj, filename):
+def __save_object(obj, filename):
     with open(filename, 'wb') as outp:
         pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
 
-def __loadObject(filename):
+def __load_object(filename):
     with open(filename, 'rb') as inp:
         return pickle.load(inp)
 
@@ -30,23 +30,23 @@ def __loadObject(filename):
 #                     arguments="-sV -O -Pn")
 
 
-def __loadScanResultObject(): 
+def __load_scan_resul_object(): 
     if (os.path.exists('scan_result.pkl')):
-        scan_result = __loadObject('scan_result.pkl')
+        scan_result = __load_object('scan_result.pkl')
         return scan_result
     else:
         nm = nmap.PortScanner()
         scan_range = nm.scan(hosts = "192.168.3.1 192.168.3.12",
                              arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
         scan_result = scan_range['scan']
-        __saveObject(scan_result, 'scan_result.pkl')
+        __save_object(scan_result, 'scan_result.pkl')
         return scan_result
 
-def discoverHosts(network):
-    return ""
+def discover_hosts(network):
+    return None
 
-def scanV6(hostS):
-    return ""
+def scan_V6(hostS):
+    return None
 
 def scan(hostS): # settings? v6 etc. 
     #nm = nmap.PortScanner()
@@ -54,7 +54,7 @@ def scan(hostS): # settings? v6 etc.
     #                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
     #scan_result = scan_range['scan']
 
-    scan_result = __loadScanResultObject()
+    scan_result = __load_scan_resul_object()
 
     keys = scan_result.keys()
 

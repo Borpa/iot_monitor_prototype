@@ -6,20 +6,25 @@ import json
 from bs4 import BeautifulSoup
 
 source_cve = 'https://www.cve.org/CVERecord?id='
+source_cve_json = 'https://cveawg.mitre.org/api/cve/'
 source_nist = 'https://nvd.nist.gov/vuln/detail/'
 
-def __getHTML(url):
+def __get_HTML(url):
     response = requests.get(url)
-    return response.text
+    try:
+        text = response.text
+    except:
+        raise Exception("Incorrect URL")
+    return text
 
-def __validateCVEFormat(cve):
+def __validate_CVE_format(cve):
     return re.fullmatch('^CVE-\d{4}-\d{4}$', cve)
 
-def getCVEInfoFromNIST(cve):
-    if (not __validateCVEFormat(cve)):
-        return ''
+def get_CVE_info_JSON_from_NIST(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format")
     
-    html = __getHTML(source_nist + cve)
+    html = __get_HTML(source_nist + cve)
     soup = BeautifulSoup(html, 'html.parser')
 
     vuln_desc = soup.find('p', attrs={'data-testid': 'vuln-description'}).getText()
@@ -31,8 +36,22 @@ def getCVEInfoFromNIST(cve):
 
     return json.dumps(res, indent = 4)
 
-def getCVEInfoFromCVEorg(cve):
-    if (not __validateCVEFormat(cve)):
-        return ''
-    html = __getHTML(source_cve + cve)
+def get_CVE_desc_from_CVEorg(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format")
+    
+    html = __get_HTML(source_cve + cve)
     soup = BeautifulSoup(html, 'html.parser')
+    try:
+        vuln_desc = soup.find('p', attrs={'data-v-7b1e4942'}).getText()
+    except:
+        vuln_desc = None
+    print(vuln_desc)
+
+def get_CVE_JSON(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format")
+    
+    rawstr = __get_HTML(source_cve_json + cve)
+    return json.loads(rawstr)
+
