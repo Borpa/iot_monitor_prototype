@@ -31,24 +31,40 @@ def __load_object(filename):
 
 
 def __load_scan_resul_object(): 
-    if (os.path.exists('scan_result.pkl')):
-        scan_result = __load_object('scan_result.pkl')
+    if (os.path.exists('./temp/scan_result.pkl')):
+        scan_result = __load_object('./temp/scan_result.pkl')
         return scan_result
     else:
         nm = nmap.PortScanner()
         scan_range = nm.scan(hosts = "192.168.3.1 192.168.3.12",
                              arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
         scan_result = scan_range['scan']
-        __save_object(scan_result, 'scan_result.pkl')
+        __save_object(scan_result, './temp/scan_result.pkl')
         return scan_result
 
 def discover_hosts(network):
+    nm = nmap.PortScanner()
+    host_list = nm.scan(hosts=network,
+                        arguments="-sV -O -Pn") #-oX <filename> -> XML format
+    return host_list
+
+def discover_hosts(network, write_to_xml=False):
+    nm = nmap.PortScanner()
+    if (write_to_xml):
+        return nm.scan(hosts=network,
+                        arguments="-sV -O -Pn -oX ./temp/host_list.xml")
+    else:
+        return discover_hosts(network)
+
+def discover_v6_hosts():
+    #nmap --script=ipv6-multicast-mld-list
+    #ping - 6 ff02::1 
     return None
 
 def scan_V6(hostS):
     return None
 
-def scan(hostS): # settings? v6 etc. 
+def scan(hostS):
     #nm = nmap.PortScanner()
     #scan_range = nm.scan(hosts = hostS,
     #                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
@@ -85,11 +101,13 @@ def scan(hostS): # settings? v6 etc.
 
         i+=1
 
-    df.to_csv("scan.csv")
-    df.to_json("scan.json")
+    df.to_csv("./temp/scan.csv")
+    df.to_json("./temp/scan.json")
     return df
 
 #matches = re.findall('\[CVE-\d{4}-\d{4}.*]', raw_str)
 
 #https://www.cve.org/CVERecord?id=
 #https://nvd.nist.gov/vuln/detail/CVE-
+
+print(scan('192.168.3.1'))

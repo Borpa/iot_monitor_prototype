@@ -18,10 +18,10 @@ def get_host_local_IPV6():
 
 def get_host_IPV6():
     rawstr = str(socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET6))
-    ipv6 = re.findall('\w{4}\:\:\w{4}\:\w{4}\:\w{4}\:\w{4}', rawstr)[1]
-    return ipv6   
+    ipv6 = re.findall('\w{4}\:\w{4}\:\w{4}\:\w{4}\:\w{4}\:\w{4}\:\w{4}\:\w{4}', rawstr)[1]
+    return ipv6
 
 def get_network_local_IPV6():
     return None
 
-print(get_host_local_IPV6())
+print(get_host_IPV6())
