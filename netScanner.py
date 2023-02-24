@@ -17,7 +17,7 @@ def __load_object(filename):
     with open(filename, 'rb') as inp:
         return pickle.load(inp)
 
-#scan_range = nm.scan(hosts = "2400:2650:78c5:1200:608b:ea8f:a3f:aeda",
+#scan_range = nm.scan(hosts = "",
 #                     arguments="-6 -sV")
 
 #scan_range = nm.scan(hosts="192.168.3.11",
