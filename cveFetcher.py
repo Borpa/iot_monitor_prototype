@@ -18,9 +18,9 @@ def __get_HTML(url):
     return text
 
 def __validate_CVE_format(cve):
-    return re.fullmatch('^CVE-\d{4}-\d{4}$', cve)
+    return re.fullmatch('^CVE-\d{4}-\d{4,}$', cve)
 
-def get_CVE_info_JSON_from_NIST(cve):
+def get_CVE_info_from_NIST_JSON(cve):
     if (not __validate_CVE_format(cve)):
         raise Exception("Incorrect CVE format")
     
@@ -46,7 +46,7 @@ def get_CVE_desc_from_CVEorg(cve):
         vuln_desc = soup.find('p', attrs={'data-v-7b1e4942'}).getText()
     except:
         vuln_desc = None
-    print(vuln_desc)
+    return vuln_desc
 
 def get_CVE_JSON(cve):
     if (not __validate_CVE_format(cve)):
@@ -55,3 +55,4 @@ def get_CVE_JSON(cve):
     rawstr = __get_HTML(source_cve_json + cve)
     return json.loads(rawstr)
 
+print(get_CVE_info_from_NIST_JSON('CVE-2022-39952'))

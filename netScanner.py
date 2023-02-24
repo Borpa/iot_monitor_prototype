@@ -42,6 +42,8 @@ def __load_scan_resul_object():
         __save_object(scan_result, './temp/scan_result.pkl')
         return scan_result
 
+#TODO: save as a JSON/dict: OSs, ports and running services, device types (manufactureres)
+
 def discover_hosts(network):
     nm = nmap.PortScanner()
     host_list = nm.scan(hosts=network,
@@ -82,7 +84,7 @@ def scan(hostS):
     for key in keys:
         raw_str = str(scan_result[key])
 
-        cve_matches = re.findall('\[CVE-\d{4}-\d{4}', raw_str)
+        cve_matches = re.findall('\[CVE-\d{4}-\d{4,}', raw_str)
         formatted_cve_matches = []
         for match in cve_matches:
             match = match.replace('[','')

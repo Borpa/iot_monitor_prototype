@@ -1,6 +1,8 @@
 import socket
 import re
 
+#TODO: ipv6_regex
+
 def get_host_local_IPV4():
     return socket.gethostbyname(socket.gethostname())
 
@@ -22,6 +24,7 @@ def get_host_IPV6():
     return ipv6
 
 def get_network_local_IPV6():
+    #nmap --script=ipv6-multicast-mld-list
     return None
 
 print(get_host_IPV6())
