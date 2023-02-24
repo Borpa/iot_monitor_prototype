@@ -6,6 +6,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (QApplication, QLabel, QPushButton,
                                QVBoxLayout, QWidget)
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
