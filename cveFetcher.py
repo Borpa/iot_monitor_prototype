@@ -21,8 +21,11 @@ def __validate_CVE_format(cve):
     return re.fullmatch('^CVE-\d{4}-\d{4,}$', cve)
 
 def get_CVE_info_from_NIST_JSON(cve):
+    return json.dumps(get_CVE_info_from_NIST(cve), indent = 4)
+
+def get_CVE_info_from_NIST(cve):
     if (not __validate_CVE_format(cve)):
-        raise Exception("Incorrect CVE format")
+        raise Exception("Incorrect CVE format: ", cve)
     
     html = __get_HTML(source_nist + cve)
     soup = BeautifulSoup(html, 'html.parser')
@@ -34,11 +37,11 @@ def get_CVE_info_from_NIST_JSON(cve):
         cvss_score = "N/A"
     res = dict({"Description": vuln_desc, "CVSS score": cvss_score})
 
-    return json.dumps(res, indent = 4)
+    return res
 
 def get_CVE_desc_from_CVEorg(cve):
     if (not __validate_CVE_format(cve)):
-        raise Exception("Incorrect CVE format")
+        raise Exception("Incorrect CVE format: ", cve)
     
     html = __get_HTML(source_cve + cve)
     soup = BeautifulSoup(html, 'html.parser')
@@ -55,4 +58,31 @@ def get_CVE_JSON(cve):
     rawstr = __get_HTML(source_cve_json + cve)
     return json.loads(rawstr)
 
-print(get_CVE_info_from_NIST_JSON('CVE-2022-39952'))
+def get_CVSS_score(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format: ", cve)   
+    html = __get_HTML('https://www.cvedetails.com/cve/' + cve)
+    soup = BeautifulSoup(html, 'html.parser')
+    try:
+        cvss = soup.find('div', attrs={'class':"cvssbox"}).getText()
+    except:
+        cvss = 'N/A'
+    return cvss  
+
+def get_CVE_details(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format: ", cve)   
+    html = __get_HTML('https://www.cvedetails.com/cve/' + cve)
+    soup = BeautifulSoup(html, 'html.parser')
+    try:
+        cvss = soup.find('div', attrs={'class':"cvedetailssummary"}).getText()
+    except:
+        cvss = 'N/A'
+    return cvss   
+
+
+#print(get_CVE_info_from_NIST('CVE-2022-39952')['CVSS score'])
+
+#https://www.cvedetails.com/cve/CVE-2023-26468/
+
+#print(get_CVE_details('CVE-2019-0001'))
