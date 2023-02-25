@@ -8,6 +8,7 @@ import re
 import numpy as np
 import pickle
 import os
+import cveFetcher as fetcher
 
 def __save_object(obj, filename):
     with open(filename, 'wb') as outp:
@@ -42,7 +43,7 @@ def __load_scan_resul_object():
         __save_object(scan_result, './temp/scan_result.pkl')
         return scan_result
 
-#TODO: save as a JSON/dict: OSs, ports and running services, device types (manufactureres)
+#TODO: save as a JSON/dict: OSs, ports and running services, device (manufactureres)
 
 def discover_hosts(network):
     nm = nmap.PortScanner()
@@ -74,9 +75,23 @@ def scan(hostS):
 
     scan_result = __load_scan_resul_object()
 
+    #print(scan_range.all_hosts())
+    #print(scan_result['192.168.3.1'].state())
+    #print(scan_result['192.168.3.1'].all_protocols()) 
+    #print(scan_result['192.168.3.1']['tcp'].keys())
+    #print(scan_result['192.168.3.1']['tcp'][80])
+    #print(scan_result['192.168.3.1'].tcp(80))
+
+    #https://www.studytonight.com/network-programming-in-python/integrating-port-scanner-with-nmap
+    #https://www.studytonight.com/network-programming-in-python/banner-grabbing
     keys = scan_result.keys()
 
-    df = pd.DataFrame(columns=['host', 'CVE', 'CVSS'])
+    #print(keys)
+
+    col = ['host', 'CVE', 'CVSS']
+
+    df = pd.DataFrame(columns=col)
+    df.index.name='id'
     df['CVE'] = df['CVE'].astype(object)
 
     i = 0
@@ -84,28 +99,45 @@ def scan(hostS):
     for key in keys:
         raw_str = str(scan_result[key])
 
-        cve_matches = re.findall('\[CVE-\d{4}-\d{4,}', raw_str)
+        cve_matches = re.findall('\[CVE-\d{4}-\d{4,5}', raw_str)
         formatted_cve_matches = []
         for match in cve_matches:
             match = match.replace('[','')
             formatted_cve_matches.append(match)
         formatted_cve_matches = np.unique(formatted_cve_matches)
         
-        cvss_matches = re.findall('Base Score \d{1}.\d{1}', raw_str)
+        cvss_matches = re.findall('Score \d{1}.\d{1}', raw_str)
         cvss_scores = []
         for match in cvss_matches:
-            match = match.split(' ')[2]
+            match = match.split(' ')[1]
             cvss_scores.append(match)
 
         df.at[i, 'host'] = key
         df.at[i, 'CVE'] = formatted_cve_matches.tolist()
         df.at[i, 'CVSS'] = cvss_scores
-
         i+=1
 
-    df.to_csv("./temp/scan.csv")
-    df.to_json("./temp/scan.json")
+    df[col].to_csv("./temp/scan.csv")
+    df[col].to_json("./temp/scan.json")
+    #__create_cve_cvss_db(df['CVE'].values)
     return df
+
+#def __create_cve_cvss_db(cve_list):
+#   cves = []
+#   for cve in cve_list:
+#       cves.extend(cve)
+#   
+#   cve_list = np.unique(cves)
+#   cols = ['CVE', 'CVSS']
+#   df = pd.DataFrame(columns=cols)
+#   df.index.name='id'
+#   i = 0 
+#   for cve in cve_list:
+#       df.at[i, 'CVE'] = cve
+#       df.at[i, 'CVSS'] = fetcher.get_CVSS(cve)
+#       i+=1
+#
+#   df.to_csv('./temp/cve-cvss-db.csv')
 
 #matches = re.findall('\[CVE-\d{4}-\d{4}.*]', raw_str)
 
