@@ -48,8 +48,8 @@ class DeviceList(QWidget):
         return list_widget
     
     def __device_list_item_clicked(self, item):
-        device = __get_device_stats(item.text())
-        __create_device_info_widget(self, device)
+        device = self.__get_device_stats(item.text())
+        self.__create_device_info_widget(device)
 
     def __get_device_stats(self, device):
         #df = pd.read_csv('./temp/scan.csv')
@@ -73,7 +73,7 @@ class DeviceList(QWidget):
         info_layout = QGridLayout()
         device_info.setLayout(info_layout)
 
-        piechart = __get_vuln_pie_chart(device_info, device)
+        piechart = self.__get_vuln_pie_chart(device)
 
         info_layout.addWidget(piechart, 0, 0)
 
@@ -135,11 +135,11 @@ class DeviceList(QWidget):
         return chart
     
     def __vuln_list_item_clicked(widget, item):
-        vuln_desc = __get_vuln_info(item.text())['description']
+        vuln_desc = widget.__get_vuln_info(item.text())['description']
         cve_widget = QWidget()
         widget.info_layout.addWidget()
 
-    def __get_vuln_info(cve):
+    def __get_vuln_info(self, cve):
         info = fetcher.get_CVE_details(cve)
         score = fetcher.get_CVSS_score(cve)
         return {'description': info, 'cvss score': score}
