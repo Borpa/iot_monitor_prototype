@@ -10,11 +10,11 @@ from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
 from PySide6 import QtGui
 
 import pandas as pd
-import numpy as np
 from random import random, uniform
 from deviceList import DeviceList
 
-import netScanner as scanner
+import netScanner as netscanner
+from newScan import Scanner
 
 class GridTest(QWidget):
     def __init__(self):
@@ -78,7 +78,7 @@ class GridTest(QWidget):
         #layout.addRow('Email Address:', QLineEdit(self))
 
         device_list = DeviceList()
-        new_scan = QWidget(self)
+        new_scan = Scanner()
         
         tab.addTab(system_stats_page, 'System stats')
         tab.addTab(device_list, 'Device list')
@@ -139,7 +139,7 @@ class GridTest(QWidget):
         return pd.read_csv('./temp/scan.csv')
     
     def __load_host_data(self):
-        return scanner.get_host_scan_result()
+        return netscanner.get_host_scan_result()
 
     def __create_vuln_pie_chart(self):
         chart = QChart()
@@ -148,7 +148,7 @@ class GridTest(QWidget):
         df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
         low = med = high = crit = 0
         average = 0
-
+        #TODO: cache the result into a temp file
         for cvss in df_cvss['CVSS'].values:
             try:
                 cvss = float(cvss)
