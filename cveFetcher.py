@@ -5,6 +5,11 @@ import requests
 import json
 from bs4 import BeautifulSoup
 
+import asyncio
+import aiohttp
+import time
+from aiolimiter import AsyncLimiter
+
 source_cve = 'https://www.cve.org/CVERecord?id='
 source_cve_json = 'https://cveawg.mitre.org/api/cve/'
 source_nist = 'https://nvd.nist.gov/vuln/detail/'
@@ -80,6 +85,12 @@ def get_CVE_details(cve):
         cvss = 'N/A'
     return cvss   
 
+#async def __fetch_async(url):
+
+def get_CVSS_score_list(cve_list): #TODO: make async with request limiter 
+    result = []
+    #for cve in cve_list
+    return None
 
 #print(get_CVE_info_from_NIST('CVE-2022-39952')['CVSS score'])
 
