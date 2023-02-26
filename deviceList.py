@@ -122,10 +122,10 @@ class DeviceList(QWidget):
 
         average = average / len(df_cvss['CVSS'].values)
 
-        series.append('Low: {}'.format(low), low)
-        series.append('Medium: {}'.format(med), med)
-        series.append('High: {}'.format(high), high)
-        series.append('Critical: {}'.format(crit), crit)
+        series.append(f'Low: {low}', low)
+        series.append(f'Medium: {med}', med)
+        series.append(f'High: {high}', high)
+        series.append(f'Critical: {crit}', crit)
 
         average = average / len(cve_list)
 

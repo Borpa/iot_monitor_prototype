@@ -30,43 +30,23 @@ class GridTest(QWidget):
         self.show()
 
     def init_UI(self):
-        grid = QGridLayout()  
-
+        #could be removed in the future: is used for testing 
         self.list_count = 3
         self.value_max = 10
         self.value_count = 7
         self.data_table = self.generate_random_data(self.list_count,
             self.value_max, self.value_count)
 
-        
-        #qbox = QHBoxLayout()
-
-        #buttonDevicesList = QPushButton()
-        #buttonDevicesList.setFixedHeight(20)
-        #buttonDevicesList.setMaximumWidth(300)
-        #buttonDevicesList.setText("Devices list")
-
-        #buttonNewScan = QPushButton()
-        #buttonNewScan.setFixedHeight(20)
-        #buttonNewScan.setMaximumWidth(300)
-        #buttonNewScan.setText("New scan")
-
-        #qbox.addWidget(buttonDevicesList)
-        #qbox.addWidget(buttonNewScan)
-        
-        #grid.addLayout(qbox, 0 ,0) 
-
-        #self.setLayout(grid)
-
-        main_layout = QGridLayout(self)
+        main_layout = QGridLayout(self) #app layout (not just the main page)
         self.setLayout(main_layout)
         
         tab = QTabWidget(self)
-        system_stats_page = QWidget(self)
+        system_stats_page = QWidget(self) #main page (for the tabs)
         stats_layout = QGridLayout()
         system_stats_page.setLayout(stats_layout)
         system_stats_page.charts = []
 
+        #pie chart for cvss scores
         chart_view = QChartView(self.__create_vuln_pie_chart())
         chart_view.setSizePolicy(QSizePolicy.Ignored,
                                              QSizePolicy.Ignored)
@@ -75,6 +55,8 @@ class GridTest(QWidget):
         stats_layout.addWidget(chart_view, 1, 0)
         system_stats_page.charts.append(chart_view)
 
+
+        #random pie charts for the layout
         for i in range(1 ,3):
             for j in range(2):
                     if (i == 1 and j == 0): continue
@@ -85,6 +67,8 @@ class GridTest(QWidget):
                     chart_view.chart().legend().setAlignment(Qt.AlignRight)
                     stats_layout.addWidget(chart_view, i, j)
                     system_stats_page.charts.append(chart_view)
+
+        #form example - maybe will be used 
 
         #contact_page = QWidget(self)
         #layout = QFormLayout()
@@ -102,35 +86,10 @@ class GridTest(QWidget):
 
         main_layout.addWidget(tab, 0, 0, 2, 1)
 
+        #alignment example
         #alignment = qt.alignmentflag.alignright
 
-        #tab.addTab(grid, 'System info')
-
-        #grid.addWidget(tab, 0, 0)
-
-        #self.setLayout(tab)
-
-        #self.horizontalLayout.setObjectName(u"horizontalLayout")
-        #self.themeLabel = QLabel()
-        #self.themeLabel.setObjectName(u"themeLabel")
-        #self.themeLabel.setText("Hello world")
-        #self.themeLabel.setFixedHeight(20)
-        #self.horizontalLayout.addWidget(self.themeLabel)
-        
-
-        #self.themeComboBox = QComboBox()
-        #self.themeComboBox.setObjectName(u"themeComboBox")
-
-        #self.horizontalLayout.addWidget(self.themeComboBox)
-
-
-
-        #gridMain = QGridLayout()
-
-        #gridMain.addLayout(qbox, 0, 0)
-        #gridMain.addLayout(grid, 1, 1)
-        #gridMain.setColumnStretch(1, 1)
-
+    #possible interfaces 
 
     #systemStats.py
     #def __get_os_stats(self):
@@ -151,6 +110,7 @@ class GridTest(QWidget):
     #newScan.py
     #def __full_scan():
     #def __discover_hosts():
+    #def scan():
 
     #https://www.pythontutorial.net/pyqt/pyqt-qtabwidget/
     
@@ -162,6 +122,8 @@ class GridTest(QWidget):
         series = QPieSeries(chart)
         for data in self.data_table[0]:
             slc = series.append(data[1], data[0].y())
+
+            #make one distinct slice
             #if data == self.data_table[0][0]:
             #    # Show the first slice exploded with label
             #    slc.setLabelVisible()
@@ -205,13 +167,14 @@ class GridTest(QWidget):
 
         average = average / len(df_cvss['CVSS'].values)
 
-        series.append('Low: {}'.format(low), low)
-        series.append('Medium: {}'.format(med), med)
-        series.append('High: {}'.format(high), high)
-        series.append('Critical: {}'.format(crit), crit)
+        series.append(f'Low: {low}', low)
+        series.append(f'Medium: {med}', med)
+        series.append(f'High: {high}', high)
+        series.append(f'Critical: {crit}', crit)
         series.setPieSize(1)
         chart.addSeries(series)
-        return chart
+        return chart #should return chartview instead of chart (or should it not?) ? 
+                    #maybe should leave it as it is 
     
     def __create_vendor_pie_chart(self):
         chart = QChart()
@@ -263,7 +226,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     window.setWindowTitle('Iot monitor')
-    #window.setWindowIcon(QtGui.QIcon('logo.png'))
+    #window.setWindowIcon(QtGui.QIcon('./images/logo.png'))
     widget = GridTest()
     window.setCentralWidget(widget)
     available_geometry = window.screen().availableGeometry()
