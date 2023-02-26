@@ -10,12 +10,15 @@ from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
 from PySide6 import QtGui
 
 import cveFetcher as fetcher
+import netScanner as scanner
 import pandas as pd
-import json
+import numpy as np
+import ast
 
 class DeviceList(QWidget):
     def __init__(self):
         super().__init__()
+        self.hosts = scanner.get_host_scan_result()
         self.__init_ui()
         self.show()
 
@@ -39,10 +42,22 @@ class DeviceList(QWidget):
         device = __get_device_stats(item.text())
         __create_device_info_widget(self, device)
 
-    def __get_device_stats(device):
-        df = pd.read_csv('./temp/scan.csv')
-        stats = df.loc[df['host'] == device]
-        return stats
+    def __get_device_stats(self, device):
+        #df = pd.read_csv('./temp/scan.csv')
+        #stats = df.loc[df['host'] == device]
+        stats = self.hosts[device]
+        ports = stats['tcp'].keys()
+        cols = ['state', 'name', 'product', 'version']
+        df = pd.DataFrame(columns=cols)
+
+        for port in ports:
+            state = stats['tcp'][port]['state']
+            name = stats['tcp'][port]['name']
+            product = stats['tcp'][port]['product']
+            version = stats['tcp'][port]['version']
+            df = df.append(pd.DataFrame([state, name, product, version], 
+                                        columns=cols), ignore_index=True)
+        return df
 
     def __create_device_info_widget(self, device):
         device_info = QWidget(self)
@@ -58,13 +73,61 @@ class DeviceList(QWidget):
         return None
     
     def __get_vuln_pie_chart(widget, device):
+        chart = QChart()
+        chart.setTitle("Vulnerabilities")
+
+        series = QPieSeries(chart)
+        
+        df = pd.read_csv('./temp/scan.csv')
+        cve_list = df['CVE'].loc[df['host'] == device]
+        cve_list = ast.literal_eval(cve_list)
+        df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
+        
+        #Low 0 3.9
+        #Medium 4 6.9 
+        #High 7 8.9
+        #Critical 9 10
+
+        low = []
+        med = []
+        high = []
+        crit = []
+
+        average = 0
+
+        for cve in cve_list:
+            cvss = df_cvss['CVSS'].loc[df_cvss['CVE'] == cve]
+            cvss = float(cvss)
+            average += cvss
+
+            match cvss:
+                case score if score in np.arange(0, 4, 0.1):
+                    low.append(1)
+                case score if score in np.arange(4, 7, 0.1):
+                    med.append(1)
+                case score if score in np.arange(7, 9, 0.1):
+                    high.append(1)
+                case _:
+                    crit.append(1)
+
+        series.append('Low', low)
+        series.append('Medium', med)
+        series.append('High', high)
+        series.append('Critical', crit)
+
+        average = average / len(cve_list)
+
+        series.setPieSize(1)
+        chart.addSeries(series)
+
         return None
     
     def __vuln_list_item_clicked(widget, item):
-        vuln_desc = __get_vuln_info(item.text())
+        vuln_desc = __get_vuln_info(item.text())['description']
         cve_widget = QWidget()
         widget.info_layout.addWidget()
 
     def __get_vuln_info(cve):
-        info = fetcher.get_CVE_info_from_NIST_JSON(cve)
-        return info
+        info = fetcher.get_CVE_details(cve)
+        score = fetcher.get_CVSS_score(cve)
+        return {'description': info, 'cvss score': score}

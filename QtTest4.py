@@ -10,8 +10,10 @@ from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
 from PySide6 import QtGui
 
 import pandas as pd
-
+import numpy as np
 from random import random, uniform
+
+import netScanner as scanner
 
 class GridTest(QWidget):
     def __init__(self):
@@ -20,6 +22,7 @@ class GridTest(QWidget):
         #QWidget.__init__(self, parent)
         
         self.charts = []
+        self.vulns = self.__load_vuln_data()
         self.hosts = self.__load_host_data()
         self.init_UI()
          
@@ -33,17 +36,6 @@ class GridTest(QWidget):
         self.value_count = 7
         self.data_table = self.generate_random_data(self.list_count,
             self.value_max, self.value_count)
-        
-        #for i in range(1 ,3):
-        #    for j in range(2):
-        #            chart_view = QChartView(self.create_pie_chart())
-        #            chart_view.setSizePolicy(QSizePolicy.Ignored,
-        #                                     QSizePolicy.Ignored)
-        #            
-        #            chart_view.chart().legend().setAlignment(Qt.AlignRight)
-        #            #chart_view.chart().legend().show()
-        #            grid.addWidget(chart_view, i, j)
-        #            self.charts.append(chart_view)
 
         
         #qbox = QHBoxLayout()
@@ -74,8 +66,17 @@ class GridTest(QWidget):
         system_stats_page.setLayout(stats_layout)
         system_stats_page.charts = []
 
+        chart_view = QChartView(self.__create_vuln_pie_chart())
+        chart_view.setSizePolicy(QSizePolicy.Ignored,
+                                             QSizePolicy.Ignored)
+                    
+        chart_view.chart().legend().setAlignment(Qt.AlignRight)
+        stats_layout.addWidget(chart_view, 1, 0)
+        system_stats_page.charts.append(chart_view)
+
         for i in range(1 ,3):
             for j in range(2):
+                    if (i == 1 and j == 0): continue
                     chart_view = QChartView(self.create_pie_chart())
                     chart_view.setSizePolicy(QSizePolicy.Ignored,
                                              QSizePolicy.Ignored)
@@ -84,18 +85,17 @@ class GridTest(QWidget):
                     stats_layout.addWidget(chart_view, i, j)
                     system_stats_page.charts.append(chart_view)
 
-        contact_page = QWidget(self)
-        layout = QFormLayout()
-        contact_page.setLayout(layout)
+        #contact_page = QWidget(self)
+        #layout = QFormLayout()
+        #contact_page.setLayout(layout)
 
-        layout.addRow('Phone Number:', QLineEdit(self))
-        layout.addRow('Email Address:', QLineEdit(self))
+        #layout.addRow('Phone Number:', QLineEdit(self))
+        #layout.addRow('Email Address:', QLineEdit(self))
 
         device_list = QWidget(self)
         new_scan = QWidget(self)
         
         tab.addTab(system_stats_page, 'System stats')
-        tab.addTab(contact_page, 'Contact Info')
         tab.addTab(device_list, 'Device list')
         tab.addTab(new_scan, 'New scan')
 
@@ -172,27 +172,74 @@ class GridTest(QWidget):
 
         return chart
 
-    def __load_host_data(self):
+    def __load_vuln_data(self):
         return pd.read_csv('./temp/scan.csv')
+    
+    def __load_host_data(self):
+        return scanner.get_host_scan_result()
 
     def __create_vuln_pie_chart(self):
         chart = QChart()
-        chart.setTitle("Vulnerabilities, CVEs")
+        chart.setTitle("Vulnerabilities, CVSS Score")
         series = QPieSeries(chart)
-        for data in self.hosts['']:
-            series.append(data[1], data[0].y())
+        df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
+        low = med = high = crit = 0
+        average = 0
+
+        for cvss in df_cvss['CVSS'].values:
+            cvss = float(cvss)
+            average += cvss
+            match cvss:
+                case score if 0 <= score < 4:
+                    low += 1 
+                case score if 4 <= score < 7:
+                    med += 1
+                case score if 7 <= score < 9:
+                    high += 1 
+                case score if score == 'N/A':
+                    low += 1 
+                case _:
+                    crit += 1
+
+        average = average / len(df_cvss['CVSS'].values)
+
+        series.append('Low', low)
+        series.append('Medium', med)
+        series.append('High', high)
+        series.append('Critical', crit)
         series.setPieSize(1)
         chart.addSeries(series)
         return chart
     
-    def __create_device_pie_chart(self):
-        return None
+    def __create_vendor_pie_chart(self):
+        chart = QChart()
+        chart.setTitle("Vendors")
+        series = QPieSeries(chart)
+        #for data in self.hosts['']:
+        #    series.append(data[1], data[0].y())
+        series.setPieSize(1)
+        chart.addSeries(series)
+        return chart
     
     def __create_ports_pie_chart(self):
-        return None
+        chart = QChart()
+        chart.setTitle("open ports")
+        series = QPieSeries(chart)
+        #for data in self.hosts['']:
+        #    series.append(data[1], data[0].y())
+        series.setPieSize(1)
+        chart.addSeries(series)
+        return chart
     
     def __create_os_pie_chart(self):
-        return None
+        chart = QChart()
+        chart.setTitle("OS")
+        series = QPieSeries(chart)
+        #for data in self.hosts['']:
+        #    series.append(data[1], data[0].y())
+        series.setPieSize(1)
+        chart.addSeries(series)
+        return chart
     
     def generate_random_data(self, list_count, value_max, value_count):
         data_table = []
