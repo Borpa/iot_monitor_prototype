@@ -19,12 +19,21 @@ class DeviceList(QWidget):
     def __init__(self):
         super().__init__()
         self.hosts = scanner.get_host_scan_result()
+        self.charts = []
         self.__init_ui()
         self.show()
 
     def __init_ui(self):
         main_layout = QGridLayout()
         self.setLayout(main_layout)
+
+        chart_view = QChartView(self.__get_vuln_pie_chart('192.168.3.12'))
+        chart_view.setSizePolicy(QSizePolicy.Ignored,
+                                 QSizePolicy.Ignored)
+        
+        chart_view.chart().legend().setAlignment(Qt.AlignRight)
+        main_layout.addWidget(chart_view, 0, 0)
+        self.charts.append(chart_view)
 
     def __get_device_list():
         return None
@@ -72,55 +81,58 @@ class DeviceList(QWidget):
 
         return None
     
-    def __get_vuln_pie_chart(widget, device):
+    def __get_vuln_pie_chart(self, device):
         chart = QChart()
-        chart.setTitle("Vulnerabilities")
+        chart.setTitle("Vulnerabilities, CVSS scores - {}".format(device))
 
         series = QPieSeries(chart)
         
         df = pd.read_csv('./temp/scan.csv')
-        cve_list = df['CVE'].loc[df['host'] == device]
+        cve_list = df['CVE'].loc[df['host'] == device].values
+
+        cve_list = str(cve_list[0])
         cve_list = ast.literal_eval(cve_list)
         df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
-        
+
         #Low 0 3.9
         #Medium 4 6.9 
         #High 7 8.9
         #Critical 9 10
-
-        low = []
-        med = []
-        high = []
-        crit = []
+        low = med = high = crit = 0
 
         average = 0
 
         for cve in cve_list:
-            cvss = df_cvss['CVSS'].loc[df_cvss['CVE'] == cve]
-            cvss = float(cvss)
+            row = df_cvss.loc[df_cvss['CVE'] == cve]
+            cvss = row['CVSS'].values
+            try:
+                cvss = float(cvss)
+            except:
+                cvss = 0
             average += cvss
-
             match cvss:
-                case score if score in np.arange(0, 4, 0.1):
-                    low.append(1)
-                case score if score in np.arange(4, 7, 0.1):
-                    med.append(1)
-                case score if score in np.arange(7, 9, 0.1):
-                    high.append(1)
+                case score if 0 <= score < 4:
+                    low += 1 
+                case score if 4 <= score < 7:
+                    med += 1
+                case score if 7 <= score < 9:
+                    high += 1 
                 case _:
-                    crit.append(1)
+                    crit += 1
 
-        series.append('Low', low)
-        series.append('Medium', med)
-        series.append('High', high)
-        series.append('Critical', crit)
+        average = average / len(df_cvss['CVSS'].values)
+
+        series.append('Low: {}'.format(low), low)
+        series.append('Medium: {}'.format(med), med)
+        series.append('High: {}'.format(high), high)
+        series.append('Critical: {}'.format(crit), crit)
 
         average = average / len(cve_list)
 
         series.setPieSize(1)
         chart.addSeries(series)
 
-        return None
+        return chart
     
     def __vuln_list_item_clicked(widget, item):
         vuln_desc = __get_vuln_info(item.text())['description']

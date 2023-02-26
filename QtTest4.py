@@ -12,6 +12,7 @@ from PySide6 import QtGui
 import pandas as pd
 import numpy as np
 from random import random, uniform
+from deviceList import DeviceList
 
 import netScanner as scanner
 
@@ -92,7 +93,7 @@ class GridTest(QWidget):
         #layout.addRow('Phone Number:', QLineEdit(self))
         #layout.addRow('Email Address:', QLineEdit(self))
 
-        device_list = QWidget(self)
+        device_list = DeviceList()
         new_scan = QWidget(self)
         
         tab.addTab(system_stats_page, 'System stats')
@@ -180,14 +181,17 @@ class GridTest(QWidget):
 
     def __create_vuln_pie_chart(self):
         chart = QChart()
-        chart.setTitle("Vulnerabilities, CVSS Score")
+        chart.setTitle("Vulnerabilities, CVSS Scores")
         series = QPieSeries(chart)
         df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
         low = med = high = crit = 0
         average = 0
 
         for cvss in df_cvss['CVSS'].values:
-            cvss = float(cvss)
+            try:
+                cvss = float(cvss)
+            except:
+                cvss = 0
             average += cvss
             match cvss:
                 case score if 0 <= score < 4:
@@ -196,17 +200,15 @@ class GridTest(QWidget):
                     med += 1
                 case score if 7 <= score < 9:
                     high += 1 
-                case score if score == 'N/A':
-                    low += 1 
                 case _:
                     crit += 1
 
         average = average / len(df_cvss['CVSS'].values)
 
-        series.append('Low', low)
-        series.append('Medium', med)
-        series.append('High', high)
-        series.append('Critical', crit)
+        series.append('Low: {}'.format(low), low)
+        series.append('Medium: {}'.format(med), med)
+        series.append('High: {}'.format(high), high)
+        series.append('Critical: {}'.format(crit), crit)
         series.setPieSize(1)
         chart.addSeries(series)
         return chart
@@ -223,7 +225,7 @@ class GridTest(QWidget):
     
     def __create_ports_pie_chart(self):
         chart = QChart()
-        chart.setTitle("open ports")
+        chart.setTitle("Open ports") # services? 
         series = QPieSeries(chart)
         #for data in self.hosts['']:
         #    series.append(data[1], data[0].y())
