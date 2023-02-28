@@ -61,16 +61,18 @@ def get_host_scan_result():
         return None    
 
 def discover_hosts(network):
-    scan_result = __load_object('./temp/scan_result.pkl')
-    print(scan_result['192.168.3.12']['tcp'][135]) #-sU for UDP ports 
+    #scan_result = __load_object('./temp/scan_result.pkl')
+    #print(scan_result['192.168.3.12']['tcp'][135]) #-sU for UDP ports 
     #print(scan_result)
-    return scan_result
+    #return scan_result
 
-    #nm = nmap.PortScanner()
-    #host_list = nm.scan(hosts=network,
-    #                    arguments="-sV -O -Pn") #-oX <filename> -> XML format
-    #__save_object(host_list, './temp/hosts.pkl')
-    #return host_list
+    nm = nmap.PortScanner()
+    host_list = nm.scan(hosts=network,
+                        arguments="-sV -O") #-oX <filename> -> XML format
+    #nm.scan(hosts=network, arguments="-sV -O -oX")
+    #xml = nmap.nm.get_nmap_last_output()
+    __save_object(host_list, './temp/hosts.pkl')
+    return host_list
 
 #def discover_hosts(network, write_to_xml=False):
 #    nm = nmap.PortScanner()
@@ -168,3 +170,17 @@ def scan(hostS):
 
 #print(scan('192.168.3.1'))
 #discover_hosts('192.168.3.0/24')
+
+#discover_hosts('192.168.11.49')
+
+scan_result = __load_object('./temp/hosts.pkl')
+#print(scan_result['scan']['192.168.11.49']['osmatch'][0])
+
+
+#print(scan_result['scan']['192.168.11.49']['tcp'][135]['state'])
+
+
+#print(scan_result['scan']['192.168.11.49']['status'])
+
+#scan result -> separate file for each host? or 1 big file
+# table: host ports os vendor

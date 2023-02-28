@@ -9,19 +9,30 @@ from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
                               QSplineSeries, QStackedBarSeries)
 from PySide6 import QtGui
 
+import json
+
 import cveFetcher as fetcher
 import netScanner as netscanner
+from cveBrowser import CveBrower as browser
 import pandas as pd
 import ast
 import os
 
+
+#TODO: move out the json init to other class 
 class DeviceList(QWidget):
     def __handle_double_clicked(self, slice):
-        print(slice.label(), slice.value())
+        #print(slice.label(), slice.value())
+        #print(self.current_device)
+
+        bwr = browser(device=self.current_device, cvss_rating=slice.label())
+        bwr.exec_()
+
     def __init__(self):
         super().__init__()
         self.hosts = netscanner.get_host_scan_result()
         self.charts = []
+        self.current_device = ''
         self.__init_ui()
         self.show()
 
@@ -49,12 +60,15 @@ class DeviceList(QWidget):
         for device in device_list:
             list_widget.addItem(device)
         list_widget.itemClicked.connect(self.__device_list_item_clicked)
+        #list_widget.itemSelected.connect(self.__device_list_item_clicked)
 
         list_widget.setFixedWidth(300)
 
         return list_widget
     
     def __device_list_item_clicked(self, item):
+        self.current_device = item.text()
+
         #device = self.__get_device_stats(item.text())
         #self.__create_device_info_widget(device)
         chart = self.__get_cvss_pie_chart(item.text())
@@ -71,6 +85,10 @@ class DeviceList(QWidget):
         qline = QLineEdit()
         qline.setFixedHeight(200)
         qline.setReadOnly(True)
+
+        #stats = self.__get_device_stats(item.text())
+        #qline.text = stats
+
         device_info_layout.addWidget(qline, 1, 0)
         
         #cve_list = self.__create_cve_list_widget(item.text())
@@ -117,7 +135,7 @@ class DeviceList(QWidget):
         
         stats = self.hosts[device]
         ports = stats['tcp'].keys()
-        cols = ['state', 'name', 'product', 'version']
+        cols = ['port', 'state', 'name', 'product', 'version']
         df = pd.DataFrame(columns=cols)
 
         for port in ports:
@@ -125,7 +143,7 @@ class DeviceList(QWidget):
             name = stats['tcp'][port]['name']
             product = stats['tcp'][port]['product']
             version = stats['tcp'][port]['version']
-            df = df.append(pd.DataFrame([state, name, product, version], 
+            df = df.append(pd.DataFrame([port, state, name, product, version], 
                                         columns=cols), ignore_index=True)
         return df
 
@@ -177,7 +195,10 @@ class DeviceList(QWidget):
         #High 7 8.9
         #Critical 9 10
         low = med = high = crit = 0
-        cve_low = cve_med = cve_high = cve_crit = []
+        cve_low = []
+        cve_med = []
+        cve_high = []
+        cve_crit = []
 
         #average = 0
         #TODO: improve caching the result into a temp file
@@ -216,11 +237,15 @@ class DeviceList(QWidget):
         df_cache = pd.DataFrame(dict)
         df_cache.to_json(f'./temp/{device}.json')
 
-        df_cache_cve = pd.DataFrame(dict_cve)
-        df_cache_cve.to_json(f'./temp/{device}_cve.json')
+        with open(f'./temp/{device}_cve.json', 'w') as outfile:
+            json.dump(dict_cve, outfile)
+
+        #df_cache_cve = pd.DataFrame(dict_cve)
+        #df_cache_cve.to_json(f'./temp/{device}_cve.json')
 
         #average = average / len(cve_list)
-
+        
+        series.doubleClicked.connect(self.__handle_double_clicked)
         series.setPieSize(1)
         chart.addSeries(series)
 
