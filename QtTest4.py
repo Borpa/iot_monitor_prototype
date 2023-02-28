@@ -30,6 +30,15 @@ class GridTest(QWidget):
         self.show()
 
     def init_UI(self):
+        def create_chart_view(chart, x, y, legend_alignment=Qt.AlignRight):
+            chart_view = QChartView(chart)
+            chart_view.setSizePolicy(QSizePolicy.Ignored,
+                                             QSizePolicy.Ignored)
+                    
+            chart_view.chart().legend().setAlignment(legend_alignment)
+            stats_layout.addWidget(chart_view, x, y)
+            system_stats_page.charts.append(chart_view)
+
         #could be removed in the future: is used for testing 
         self.list_count = 3
         self.value_max = 10
@@ -47,26 +56,40 @@ class GridTest(QWidget):
         system_stats_page.charts = []
 
         #pie chart for cvss scores
-        chart_view = QChartView(self.__create_vuln_pie_chart())
-        chart_view.setSizePolicy(QSizePolicy.Ignored,
-                                             QSizePolicy.Ignored)
-                    
-        chart_view.chart().legend().setAlignment(Qt.AlignRight)
-        stats_layout.addWidget(chart_view, 1, 0)
-        system_stats_page.charts.append(chart_view)
+
+        create_chart_view(self.__create_vuln_pie_chart(), 1, 0)
+
+        #chart_view = QChartView(self.__create_vuln_pie_chart())
+        #chart_view.setSizePolicy(QSizePolicy.Ignored,
+        #                                     QSizePolicy.Ignored)
+                 
+        #chart_view.chart().legend().setAlignment(Qt.AlignRight)
+        #stats_layout.addWidget(chart_view, 1, 0)
+        #system_stats_page.charts.append(chart_view)
+
+        create_chart_view(self.__create_os_pie_chart(), 1, 1, Qt.AlignBottom)
+        create_chart_view(self.__create_vendor_pie_chart(), 2, 0)
+        create_chart_view(self.__create_ports_pie_chart(), 2, 1)
+
+        #chart_view = QChartView(self.__create_os_pie_chart())
+        #chart_view.setSizePolicy(QSizePolicy.Ignored,
+        #                                     QSizePolicy.Ignored)        
+        #chart_view.chart().legend().setAlignment(Qt.AlignBottom)
+        #stats_layout.addWidget(chart_view, 1, 1)
+        #system_stats_page.charts.append(chart_view)
 
 
         #random pie charts for the layout
-        for i in range(1 ,3):
-            for j in range(2):
-                    if (i == 1 and j == 0): continue
-                    chart_view = QChartView(self.create_pie_chart())
-                    chart_view.setSizePolicy(QSizePolicy.Ignored,
-                                             QSizePolicy.Ignored)
-                    
-                    chart_view.chart().legend().setAlignment(Qt.AlignRight)
-                    stats_layout.addWidget(chart_view, i, j)
-                    system_stats_page.charts.append(chart_view)
+        #for i in range(2 ,3):
+        #    for j in range(2):
+        #            if (i == 1): continue
+        #            chart_view = QChartView(self.create_pie_chart())
+        #            chart_view.setSizePolicy(QSizePolicy.Ignored,
+        #                                     QSizePolicy.Ignored)
+        #            
+        #            chart_view.chart().legend().setAlignment(Qt.AlignRight)
+        #            stats_layout.addWidget(chart_view, i, j)
+        #            system_stats_page.charts.append(chart_view)
 
         #form example - maybe will be used 
 
@@ -180,8 +203,24 @@ class GridTest(QWidget):
         chart = QChart()
         chart.setTitle("Vendors")
         series = QPieSeries(chart)
-        #for data in self.hosts['']:
-        #    series.append(data[1], data[0].y())
+        hosts = self.hosts['scan'].keys()
+        vendor_dict = dict()
+
+        for host in hosts:
+            try:
+                vendor = self.hosts['scan'][host]['vendor']
+            except:
+                vendor = 'Unknown vendor'
+            if (vendor == {}): vendor = 'Unknown vendor'
+
+            if (vendor in vendor_dict.keys()):
+                vendor_dict[vendor] += 1
+            else:
+                vendor_dict[vendor] = 1
+
+        for vendor in vendor_dict.keys():
+            series.append(vendor + f': {vendor_dict[vendor]}', vendor_dict[vendor])
+
         series.setPieSize(1)
         chart.addSeries(series)
         return chart
@@ -190,8 +229,24 @@ class GridTest(QWidget):
         chart = QChart()
         chart.setTitle("Open ports") # services? 
         series = QPieSeries(chart)
-        #for data in self.hosts['']:
-        #    series.append(data[1], data[0].y())
+        hosts = self.hosts['scan'].keys()
+        ports_dict = dict()
+
+        for host in hosts:
+            port_list = self.hosts['scan'][host]['tcp'].keys()
+
+            for port in port_list:
+                if (self.hosts['scan'][host]['tcp'][port]['state'] == 'open'):
+                    openport = str(port) + '/tcp'
+                    
+                    if (openport in ports_dict.keys()):
+                        ports_dict[openport] += 1
+                    else:
+                        ports_dict[openport] = 1
+
+        for port in ports_dict.keys():
+            series.append(port + f': {ports_dict[port]}', ports_dict[port])
+
         series.setPieSize(1)
         chart.addSeries(series)
         return chart
@@ -200,6 +255,23 @@ class GridTest(QWidget):
         chart = QChart()
         chart.setTitle("OS")
         series = QPieSeries(chart)
+        hosts = self.hosts['scan'].keys()
+        os_dict = dict()
+        for host in hosts:
+            try:
+                os = self.hosts['scan'][host]['osmatch'][0]['name']
+            except:
+                os = 'Unknown OS'
+
+            if (os in os_dict.keys()):
+                os_dict[os] += 1
+            else:
+                os_dict[os] = 1
+            
+        for os in os_dict.keys():
+            series.append(os + f': {os_dict[os]}', os_dict[os])
+
+        series.append('Unknown OS: 1', 1)
         #for data in self.hosts['']:
         #    series.append(data[1], data[0].y())
         series.setPieSize(1)
@@ -226,7 +298,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     window.setWindowTitle('Iot monitor')
-    #window.setWindowIcon(QtGui.QIcon('./images/logo.png'))
+    window.setWindowIcon(QtGui.QIcon('./images/logo.png'))
     widget = GridTest()
     window.setCentralWidget(widget)
     available_geometry = window.screen().availableGeometry()
