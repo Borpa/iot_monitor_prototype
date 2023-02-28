@@ -83,7 +83,18 @@ def get_CVE_details(cve):
         cvss = soup.find('div', attrs={'class':"cvedetailssummary"}).getText()
     except:
         cvss = 'N/A'
-    return cvss   
+    return cvss 
+
+def get_CVE_urls(cve):
+    if (not __validate_CVE_format(cve)):
+        raise Exception("Incorrect CVE format: ", cve)   
+    html = __get_HTML('https://www.cvedetails.com/cve/' + cve)
+    soup = BeautifulSoup(html, 'html.parser')
+    try:
+        urls = soup.findAll('a', attrs={'title':"External url"})
+    except:
+        urls = 'N/A'
+    return urls 
 
 #async def __fetch_async(url):
 
