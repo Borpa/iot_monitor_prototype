@@ -16,7 +16,7 @@ from deviceList import DeviceList
 import netScanner as netscanner
 from newScan import Scanner
 
-class GridTest(QWidget):
+class SystemStats(QWidget):
     def __init__(self):
         super().__init__()
         #self.setWindowTitle('IoT Monitor') 
@@ -49,6 +49,7 @@ class GridTest(QWidget):
         main_layout = QGridLayout(self) #app layout (not just the main page)
         self.setLayout(main_layout)
         
+        #TODO: move to a separate class 
         tab = QTabWidget(self)
         system_stats_page = QWidget(self) #main page (for the tabs)
         stats_layout = QGridLayout()
@@ -299,7 +300,7 @@ if __name__ == "__main__":
     window = QMainWindow()
     window.setWindowTitle('Iot monitor')
     window.setWindowIcon(QtGui.QIcon('./images/logo.png'))
-    widget = GridTest()
+    widget = SystemStats()
     window.setCentralWidget(widget)
     available_geometry = window.screen().availableGeometry()
     width = available_geometry.width()

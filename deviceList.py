@@ -3,7 +3,7 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
     QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit, QListWidget)
+    QFormLayout, QLineEdit, QListWidget, QPlainTextEdit)
 from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
                               QLineSeries, QPieSeries, QScatterSeries,
                               QSplineSeries, QStackedBarSeries)
@@ -82,7 +82,7 @@ class DeviceList(QWidget):
         device_info_layout = QGridLayout()
         device_info.setLayout(device_info_layout)
         device_info_layout.addWidget(chart_view, 0, 0)
-        qline = QLineEdit()
+        qline = QPlainTextEdit()
         qline.setFixedHeight(200)
         qline.setReadOnly(True)
 
@@ -244,7 +244,7 @@ class DeviceList(QWidget):
         #df_cache_cve.to_json(f'./temp/{device}_cve.json')
 
         #average = average / len(cve_list)
-        
+
         series.doubleClicked.connect(self.__handle_double_clicked)
         series.setPieSize(1)
         chart.addSeries(series)
