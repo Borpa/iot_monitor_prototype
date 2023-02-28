@@ -8,7 +8,6 @@ import re
 import numpy as np
 import pickle
 import os
-import cveFetcher as fetcher
 
 def __save_object(obj, filename):
     with open(filename, 'wb') as outp:
@@ -173,7 +172,8 @@ def scan(hostS):
 
 #discover_hosts('192.168.11.49')
 
-scan_result = __load_object('./temp/hosts.pkl')
+#scan_result = __load_object('./temp/hosts.pkl')
+
 #print(scan_result['scan']['192.168.11.49']['osmatch'][0])
 
 

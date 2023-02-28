@@ -27,4 +27,4 @@ def get_network_local_IPV6():
     #nmap --script=ipv6-multicast-mld-list
     return None
 
-print(get_host_IPV6())
+#print(get_host_IPV6())
