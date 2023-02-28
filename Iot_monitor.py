@@ -14,7 +14,7 @@ from random import random, uniform
 from deviceList import DeviceList
 
 import netScanner as netscanner
-from newScan import Scanner
+from newScan import ScanOptions
 
 class SystemStats(QWidget):
     def __init__(self):
@@ -102,7 +102,7 @@ class SystemStats(QWidget):
         #layout.addRow('Email Address:', QLineEdit(self))
 
         device_list = DeviceList()
-        new_scan = Scanner()
+        new_scan = ScanOptions()
         
         tab.addTab(system_stats_page, 'System stats')
         tab.addTab(device_list, 'Device list')

@@ -3,11 +3,11 @@ from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
     QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit, QListWidget, QDialog, QPlainTextEdit)
+    QFormLayout, QLineEdit, QListWidget, QDialog, QPlainTextEdit, QTextBrowser)
 from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
                               QLineSeries, QPieSeries, QScatterSeries,
                               QSplineSeries, QStackedBarSeries)
-from PySide6 import QtGui
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import cveFetcher as fetcher
 import netScanner as netscanner
@@ -32,7 +32,7 @@ class CveBrower(QDialog):
         self.setLayout(self.main_layout)
 
         cve_list = self.__create_cve_list_widget(self.device)
-        self.main_layout.addWidget(cve_list, 0, 0)
+        self.main_layout.addWidget(cve_list, 0, 0, 2, 1)
         self.main_layout.addWidget(QWidget(), 0, 1)
         
 
@@ -41,18 +41,19 @@ class CveBrower(QDialog):
         #df = pd.read_csv('./temp/scan.csv')
         #df = pd.read_json(f'./temp/{self.device}_cve.json')
 
-        f = open (f'./temp/{self.device}_cve.json', 'r')
-        data = json.loads(f.read())
+        file_json = open (f'./temp/{self.device}_cve.json', 'r')
+        cve_data = json.loads(file_json.read())
 
+        #TODO: replace with something better or with a separate function
         rating = self.cvss_rating.replace(':', '')
         rating = rating.split()[0]
         rating = rating.lower()
         if (rating == 'medium'): rating = 'med'
         if (rating == 'critical'): rating = 'crit'
 
-        cve_list = data[rating]
+        cve_list = cve_data[rating]
 
-        f.close()
+        file_json.close()
 
         #cve_list = str(cve_list[0])
         #cve_list = ast.literal_eval(cve_list)
@@ -65,10 +66,28 @@ class CveBrower(QDialog):
         return list_widget
 
     def __cve_list_item_clicked(self, item):
-        qtext = QPlainTextEdit()
-        qtext.setFixedHeight(700)
-        qtext.setReadOnly(True)
+        qtext = QTextBrowser()
+        qtext.setFixedHeight(400)
+        qtext.setOpenExternalLinks(True)
+        #qtext.setReadOnly(True)
         desc = fetcher.get_CVE_details(item.text())
         
-        qtext.setPlainText(f'Rating: {fetcher.get_CVSS_score(item.text())} \nDescription:{desc}')
+        url_list = fetcher.get_CVE_urls(item.text())
+        urls = ''
+
+        for url in url_list:
+            urls += str(url) + '<br>'
+
+        qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \n\r Description:{desc}')
+        #qtext.setText(f'{urls[0]} \n {urls[1]} urls nice')
+        qtext.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        qtext.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
         self.main_layout.addWidget(qtext, 0, 1)
+
+        qlinks = QTextBrowser()
+        qlinks.setFixedHeight(140)
+        qlinks.setOpenExternalLinks(True)
+        qlinks.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        qlinks.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
+        qlinks.setText(urls)
+        self.main_layout.addWidget(qlinks, 1, 1)
