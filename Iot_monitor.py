@@ -299,7 +299,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QMainWindow()
     window.setWindowTitle('Iot monitor')
-    window.setWindowIcon(QtGui.QIcon('./images/logo.png'))
+    window.setWindowIcon(QtGui.QIcon('./images/logo_new.png'))
     widget = SystemStats()
     window.setCentralWidget(widget)
     available_geometry = window.screen().availableGeometry()
