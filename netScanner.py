@@ -67,7 +67,7 @@ def discover_hosts(network):
 
     nm = nmap.PortScanner()
     host_list = nm.scan(hosts=network,
-                        arguments="-sV -O") #-oX <filename> -> XML format
+                        arguments="-sV -sT -sU -O") #-oX <filename> -> XML format
     #nm.scan(hosts=network, arguments="-sV -O -oX")
     #xml = nmap.nm.get_nmap_last_output()
     __save_object(host_list, './temp/hosts.pkl')
@@ -93,7 +93,7 @@ def scan_V6(hostS):
 def scan(hostS):
     #nm = nmap.PortScanner()
     #scan_range = nm.scan(hosts = hostS,
-    #                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
+    #                     arguments="-sV -sT -sU --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
     #scan_result = scan_range['scan']
     #__save_object(scan_result, './temp/scan_result.pkl')
     scan_result = __load_scan_result_object()
