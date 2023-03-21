@@ -125,28 +125,22 @@ class DeviceList(QWidget):
 
         stats = netscanner.get_vuln_scan_result()
         stats = stats[device]
-        ports = stats['tcp'].keys()
+        port_types = ['tcp', 'udp']
+        for port_type in port_types:
+            ports = stats[port_type].keys()
 
-        cols = ['port', 'state', 'name', 'product', 'version']
-        #df = pd.DataFrame(columns=cols)
+            prt = []
+            state = []
+            name = []
+            product = []
+            version = []
 
-        prt = []
-        state = []
-        name = []
-        product = []
-        version = []
-
-        for port in ports:
-            state.append(stats['tcp'][port]['state'])
-            name.append(stats['tcp'][port]['name'])
-            product.append(stats['tcp'][port]['product'])
-            version.append(stats['tcp'][port]['version'])
-            prt.append(str(port) + '/tcp')
-            #row = [port, state, name, product, version]
-            #row = list(map(lambda x:'-' if x == '' else x, row))
-            #print(row)
-            #df = df.append(pd.DataFrame({'port': port, 'state': state, 'name': name, 'product': product, 'version': version}, 
-            #                           columns=cols), ignore_index=True)
+            for port in ports:
+                state.append(stats[port_type][port]['state'])
+                name.append(stats[port_type][port]['name'])
+                product.append(stats[port_type][port]['product'])
+                version.append(stats[port_type][port]['version'])
+                prt.append(str(port) + '/' + port_type)
 
         df = pd.DataFrame({'port': prt, 'state': state, 'name': name, 'product': product, 'version': version})
 

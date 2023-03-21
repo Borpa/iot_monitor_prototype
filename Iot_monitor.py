@@ -167,17 +167,20 @@ class SystemStats(QWidget):
         hosts = self.hosts['scan'].keys()
         ports_dict = dict()
 
-        for host in hosts:
-            port_list = self.hosts['scan'][host]['tcp'].keys()
+        port_types = ['tcp', 'udp']
 
-            for port in port_list:
-                if (self.hosts['scan'][host]['tcp'][port]['state'] == 'open'):
-                    openport = str(port) + '/tcp'
-                    
-                    if (openport in ports_dict.keys()):
-                        ports_dict[openport] += 1
-                    else:
-                        ports_dict[openport] = 1
+        for host in hosts:
+            for port_type in port_types:
+                port_list = self.hosts['scan'][host][port_type].keys()
+
+                for port in port_list:
+                    if (self.hosts['scan'][host][port_type][port]['state'] == 'open'):
+                        openport = str(port) + '/' + port_type
+
+                        if (openport in ports_dict.keys()):
+                            ports_dict[openport] += 1
+                        else:
+                            ports_dict[openport] = 1
 
         for port in ports_dict.keys():
             series.append(port + f': {ports_dict[port]}', ports_dict[port])
