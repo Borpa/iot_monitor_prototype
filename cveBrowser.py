@@ -24,7 +24,8 @@ class CveBrower(QDialog):
 
         self.__init_ui()
         self.setWindowTitle(f'CVE browser, rating: {cvss_rating}')
-        self.setFixedSize(720, 480)
+        self.setWindowIcon(QtGui.QIcon('./images/logo_new.png'))
+        self.setFixedSize(720, 720)
         self.show()
 
     def __init_ui(self):
@@ -32,7 +33,7 @@ class CveBrower(QDialog):
         self.setLayout(self.main_layout)
 
         cve_list = self.__create_cve_list_widget(self.device)
-        self.main_layout.addWidget(cve_list, 0, 0, 2, 1)
+        self.main_layout.addWidget(cve_list, 0, 0, 3, 1)
         self.main_layout.addWidget(QWidget(), 0, 1)
         
 
@@ -67,7 +68,7 @@ class CveBrower(QDialog):
 
     def __cve_list_item_clicked(self, item):
         qtext = QTextBrowser()
-        qtext.setFixedHeight(400)
+        qtext.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         qtext.setOpenExternalLinks(True)
         #qtext.setReadOnly(True)
         #desc = fetcher.get_CVE_details(item.text())
@@ -79,22 +80,36 @@ class CveBrower(QDialog):
             urls += str(url) + '<br>'
 
         #qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \nDescription:{desc}')
-        info = fetcher.get_CVE_info_from_Mend(item.text())
-        cvss = info['CVSS']
-        lang = info['Language']
-        desc = info['Description']
-        date = info['Date']
+        info_nist = fetcher.get_CVE_info_from_NIST(item.text())
+        cvss = info_nist['CVSS']
+        desc = info_nist['Description']
+        date_pub = info_nist['Published Date']
+        date_mod = info_nist['Last Modified']
 
-        qtext.setText(f'Rating: {cvss} \nDescription:{desc}\n{lang}\n{date}')
+        info_mend = fetcher.get_CVE_info_from_Mend(item.text())
+        lang = info_mend['Language']
+
+        qtext.setText(f'Rating: {cvss} \nDescription:{desc}\n{lang}\nPublished: {date_pub}\nLast Modified: {date_mod}')
         #qtext.setText(f'{urls[0]} \n {urls[1]} urls ')
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
-        self.main_layout.addWidget(qtext, 0, 1)
+        
 
         qlinks = QTextBrowser()
-        qlinks.setFixedHeight(140)
+        #qlinks.setMinimumHeight(140)
         qlinks.setOpenExternalLinks(True)
         qlinks.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         qlinks.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
         qlinks.setText(urls)
+
+
+        qfixes = QTextBrowser()
+        qfixes.setOpenExternalLinks(True)
+        qfixes.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        qfixes.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
+        qfixes.setText(str(fetcher.get_CVE_top_fixes(item.text())))
+        qfixes.setMaximumHeight(140)
+
+        self.main_layout.addWidget(qfixes, 2, 1)
         self.main_layout.addWidget(qlinks, 1, 1)
+        self.main_layout.addWidget(qtext, 0, 1)

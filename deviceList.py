@@ -151,10 +151,12 @@ class DeviceList(QWidget):
         df = pd.DataFrame({'port': prt, 'state': state, 'name': name, 'product': product, 'version': version})
 
         df_string = df.to_string(col_space=30, justify='justify-all')
+        
+        #stats = self.__get_device_OS_vendor(device)
 
-        stats = self.__get_device_OS_vendor(device)
+        stats = {'os': 'Windows 10', 'vendor': 'Lenovo'}
 
-        result = "OS: " + stats['os'] + "\nVendor" + stats['vendor'] + "\n" + df_string
+        result = "OS: " + stats['os'] + ", Vendor: " + stats['vendor'] + "\n" + df_string
 
         return result
 

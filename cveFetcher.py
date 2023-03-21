@@ -42,11 +42,24 @@ def get_CVE_info_from_NIST(cve):
     soup = BeautifulSoup(html, 'html.parser')
 
     vuln_desc = soup.find('p', attrs={'data-testid': 'vuln-description'}).getText()
-    try:
-        cvss_score = soup.find('a', attrs={'data-testid': "vuln-cvss3-panel-score"}).getText()
-    except:
-        cvss_score = "N/A"
-    res = dict({"Description": vuln_desc, "CVSS": cvss_score})
+    cvss_score3 = cvss_score2 = 'N/A'
+    date_pub = soup.find('span', attrs={'data-testid': 'vuln-published-on'}).getText()
+    date_mod = soup.find('span', attrs={'data-testid': 'vuln-last-modified-on'}).getText()
+
+    cvss_score3 = soup.find('a', attrs={'id': "Cvss3NistCalculatorAnchor"})
+    cvss_score3NA = soup.find('a', attrs={'id': "Cvss3NistCalculatorAnchorNA"})
+    cvss_score2 = soup.find('a', attrs={'id': "Cvss2CalculatorAnchor"})
+
+    if (cvss_score3 is not None and cvss_score3.getText() != 'N/A'): 
+        cvss_score = cvss_score3.getText()
+    elif (cvss_score3NA is not None and cvss_score3NA.getText() != 'N/A'):
+        cvss_score = cvss_score3NA.getText()
+    else:
+        cvss_score = cvss_score2.getText()
+
+    if (cvss_score != 'N/A'): cvss_score = cvss_score.split()[0]    
+    
+    res = dict({"Description": vuln_desc, "CVSS": cvss_score, "Published Date": date_pub, "Last Modified": date_mod})
 
     return res
 
@@ -55,28 +68,30 @@ def get_CVE_info_from_Mend(cve):
     soup = BeautifulSoup(html, 'html.parser')
 
     vuln_desc = soup.findAll('div', attrs={'class': 'single-vuln-desc'})
-
-    for vuln in vuln_desc:
-        desc = vuln.find('p').getText()
-        desc = desc.replace('\n', '')
-        desc = desc.replace('  ', '')
-
-        date = vuln.findAll('h4')[0]
-        date = date.getText()
-        date = date.replace('\n', '')
-        date = date.replace('  ', '')
-
-        lang = vuln.findAll('h4')[1]
-        lang = lang.getText()
-        lang = lang.replace('\n', '')
-        lang = lang.replace('  ', '')
+    date = 'Date: N/A'
+    desc = 'N/A'
+    lang = 'Language: N/A'
 
     try:
         cvss_score = soup.find('label', attrs={'class': "tooltipster"})['data-value']
+        for vuln in vuln_desc:
+            desc = vuln.find('p').getText()
+            desc = desc.replace('\n', '')
+            desc = desc.replace('  ', '')
+
+            date = vuln.findAll('h4')[0]
+            date = date.getText()
+            date = date.replace('\n', '')
+            date = date.replace('  ', '')
+
+            lang = vuln.findAll('h4')[1]
+            lang = lang.getText()
+            lang = lang.replace('\n', '')
+            lang = lang.replace('  ', '')
+
     except:
         cvss_score = "N/A"
     res = dict({"Date": date, "Description": desc, "Language": lang, "CVSS": cvss_score})
-
     return res
 
 def get_CVE_desc_from_CVEorg(cve):
@@ -119,13 +134,12 @@ def get_CVE_urls(cve):
     #    urls = 'N/A'
     #return urls 
 
-    html = __get_HTML(source_mend, cve)
+    html = __get_HTML(source_nist, cve)
     soup = BeautifulSoup(html, 'html.parser')
     try:
-        divs = soup.findAll('div', attrs={'class':"references"})
-        urls = []
-        for div in divs:
-            urls.append(div.findAll('a'))
+        table = soup.findAll('table', attrs={'data-testid':"vuln-hyperlinks-table"})
+        for td in table:
+            urls = td.findAll('a')
     except:
         urls = 'N/A'
     return urls 
@@ -155,6 +169,18 @@ def get_CVSS_score_list(cve_list): #TODO: make async with request limiter
     #for cve in cve_list
     return None
 
+def get_CVE_top_fixes(cve):
+    html = __get_HTML(source_mend, cve)
+    soup = BeautifulSoup(html, 'html.parser')
+    divs = soup.find('div', attrs={'class':re.compile("^top-fixes")})
+
+    if (divs is None): return 'No top fix available'
+
+    res = ''
+    for div in divs.findAll('p'):
+        res += str(div)
+    return res
+
 #print(get_CVE_info_from_NIST('CVE-2022-39952')['CVSS score'])
 
 #https://www.cvedetails.com/cve/CVE-2023-26468/
@@ -162,4 +188,4 @@ def get_CVSS_score_list(cve_list): #TODO: make async with request limiter
 #print(get_CVE_details('CVE-2019-0001'))
 
 
-print(get_CVE_info_from_Mend('CVE-2023-1283'))
+#print(get_CVE_info_from_Mend('CVE-2023-1283'))
