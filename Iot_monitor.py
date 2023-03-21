@@ -1,12 +1,8 @@
 import sys
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
-    QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit)
-from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
-                              QLineSeries, QPieSeries, QScatterSeries,
-                              QSplineSeries, QStackedBarSeries)
+                               QWidget, QGridLayout, QTabWidget)
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
 from PySide6 import QtGui
 
 import pandas as pd

@@ -1,23 +1,12 @@
-import sys
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainter, QPalette
-from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
-    QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit, QListWidget, QPlainTextEdit)
-from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
-                              QLineSeries, QPieSeries, QScatterSeries,
-                              QSplineSeries, QStackedBarSeries)
-from PySide6 import QtGui
-
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QSizePolicy, QWidget, QGridLayout, QListWidget, QPlainTextEdit)
+from PySide6.QtCharts import (QChart, QChartView, QPieSeries)
 import json
-
-import cveFetcher as fetcher
 import netScanner as netscanner
 from cveBrowser import CveBrower as browser
 import pandas as pd
 import ast
 import os
-
 
 #TODO: move out the json init to other class 
 class DeviceList(QWidget):
