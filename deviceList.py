@@ -40,15 +40,6 @@ class DeviceList(QWidget):
         self.main_layout = QGridLayout()
         self.setLayout(self.main_layout)
 
-        #chart_view = QChartView(self.__get_cvss_pie_chart('192.168.3.12'))
-        #chart_view.setSizePolicy(QSizePolicy.Ignored,
-        #                         QSizePolicy.Ignored)
-        #chart_view.chart().legend().setAlignment(Qt.AlignRight)
-
-        #main_layout.addWidget(chart_view, 0, 1)
-        #self.charts.append(chart_view)
-
-        #placeholder = QWidget(self)
         device_list = self.__create_device_list_widget()
         self.main_layout.addWidget(device_list, 0, 0)
         self.main_layout.addWidget(QWidget(), 0, 1)
@@ -60,7 +51,6 @@ class DeviceList(QWidget):
         for device in device_list:
             list_widget.addItem(device)
         list_widget.itemClicked.connect(self.__device_list_item_clicked)
-        #list_widget.itemSelected.connect(self.__device_list_item_clicked)
 
         list_widget.setFixedWidth(300)
 
@@ -82,14 +72,14 @@ class DeviceList(QWidget):
         device_info_layout = QGridLayout()
         device_info.setLayout(device_info_layout)
         device_info_layout.addWidget(chart_view, 0, 0)
-        qline = QPlainTextEdit()
-        qline.setFixedHeight(200)
-        qline.setReadOnly(True)
+        qtext = QPlainTextEdit()
+        qtext.setFixedHeight(200)
+        qtext.setReadOnly(True)
 
-        #stats = self.__get_device_stats(item.text())
-        #qline.text = stats
+        stats = self.__get_device_stats(item.text())
+        qtext.setPlainText(stats.to_string(col_space=30, justify='justify-all'))
 
-        device_info_layout.addWidget(qline, 1, 0)
+        device_info_layout.addWidget(qtext, 1, 0)
         
         #cve_list = self.__create_cve_list_widget(item.text())
 
@@ -133,19 +123,41 @@ class DeviceList(QWidget):
         #df = pd.read_csv('./temp/scan.csv')
         #stats = df.loc[df['host'] == device]
         
-        stats = self.hosts[device]
+        #stats = self.hosts[device]
+        #ports = stats['tcp'].keys()
+
+        stats = netscanner.get_vuln_scan_result()
+        stats = stats[device]
         ports = stats['tcp'].keys()
+
         cols = ['port', 'state', 'name', 'product', 'version']
-        df = pd.DataFrame(columns=cols)
+        #df = pd.DataFrame(columns=cols)
+
+        prt = []
+        state = []
+        name = []
+        product = []
+        version = []
 
         for port in ports:
-            state = stats['tcp'][port]['state']
-            name = stats['tcp'][port]['name']
-            product = stats['tcp'][port]['product']
-            version = stats['tcp'][port]['version']
-            df = df.append(pd.DataFrame([port, state, name, product, version], 
-                                        columns=cols), ignore_index=True)
+            state.append(stats['tcp'][port]['state'])
+            name.append(stats['tcp'][port]['name'])
+            product.append(stats['tcp'][port]['product'])
+            version.append(stats['tcp'][port]['version'])
+            prt.append(str(port) + '/tcp')
+            #row = [port, state, name, product, version]
+            #row = list(map(lambda x:'-' if x == '' else x, row))
+            #print(row)
+            #df = df.append(pd.DataFrame({'port': port, 'state': state, 'name': name, 'product': product, 'version': version}, 
+            #                           columns=cols), ignore_index=True)
+
+        df = pd.DataFrame({'port': prt, 'state': state, 'name': name, 'product': product, 'version': version})
         return df
+
+    def __get_device_OS_vendor(self, device):
+        os = self.hosts[device]['osmatch']
+        vendor = self.hosts[device]['vendor']
+        return {'os':os,'vendor':vendor}
 
     def __create_device_info_widget(self, device):
         device_info = QWidget(self)

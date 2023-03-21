@@ -39,13 +39,6 @@ class SystemStats(QWidget):
             stats_layout.addWidget(chart_view, x, y)
             system_stats_page.charts.append(chart_view)
 
-        #could be removed in the future: is used for testing 
-        self.list_count = 3
-        self.value_max = 10
-        self.value_count = 7
-        self.data_table = self.generate_random_data(self.list_count,
-            self.value_max, self.value_count)
-
         main_layout = QGridLayout(self) #app layout (not just the main page)
         self.setLayout(main_layout)
         
@@ -57,49 +50,14 @@ class SystemStats(QWidget):
         system_stats_page.charts = []
 
         #pie chart for cvss scores
-
-        create_chart_view(self.__create_vuln_pie_chart(), 1, 0)
-
-        #chart_view = QChartView(self.__create_vuln_pie_chart())
-        #chart_view.setSizePolicy(QSizePolicy.Ignored,
-        #                                     QSizePolicy.Ignored)
-                 
-        #chart_view.chart().legend().setAlignment(Qt.AlignRight)
-        #stats_layout.addWidget(chart_view, 1, 0)
-        #system_stats_page.charts.append(chart_view)
+        try:
+            create_chart_view(self.__create_vuln_pie_chart(), 1, 0)
+        except:
+            print('Vulnerability data not found')
 
         create_chart_view(self.__create_os_pie_chart(), 1, 1, Qt.AlignBottom)
         create_chart_view(self.__create_vendor_pie_chart(), 2, 0)
         create_chart_view(self.__create_ports_pie_chart(), 2, 1)
-
-        #chart_view = QChartView(self.__create_os_pie_chart())
-        #chart_view.setSizePolicy(QSizePolicy.Ignored,
-        #                                     QSizePolicy.Ignored)        
-        #chart_view.chart().legend().setAlignment(Qt.AlignBottom)
-        #stats_layout.addWidget(chart_view, 1, 1)
-        #system_stats_page.charts.append(chart_view)
-
-
-        #random pie charts for the layout
-        #for i in range(2 ,3):
-        #    for j in range(2):
-        #            if (i == 1): continue
-        #            chart_view = QChartView(self.create_pie_chart())
-        #            chart_view.setSizePolicy(QSizePolicy.Ignored,
-        #                                     QSizePolicy.Ignored)
-        #            
-        #            chart_view.chart().legend().setAlignment(Qt.AlignRight)
-        #            stats_layout.addWidget(chart_view, i, j)
-        #            system_stats_page.charts.append(chart_view)
-
-        #form example - maybe will be used 
-
-        #contact_page = QWidget(self)
-        #layout = QFormLayout()
-        #contact_page.setLayout(layout)
-
-        #layout.addRow('Phone Number:', QLineEdit(self))
-        #layout.addRow('Email Address:', QLineEdit(self))
 
         device_list = DeviceList()
         new_scan = ScanOptions()
@@ -109,9 +67,6 @@ class SystemStats(QWidget):
         tab.addTab(new_scan, 'New scan')
 
         main_layout.addWidget(tab, 0, 0, 2, 1)
-
-        #alignment example
-        #alignment = qt.alignmentflag.alignright
 
     #possible interfaces 
 
@@ -138,27 +93,6 @@ class SystemStats(QWidget):
 
     #https://www.pythontutorial.net/pyqt/pyqt-qtabwidget/
     
-
-    def create_pie_chart(self):
-        chart = QChart()
-        chart.setTitle("Pie chart")
-
-        series = QPieSeries(chart)
-        for data in self.data_table[0]:
-            slc = series.append(data[1], data[0].y())
-
-            #make one distinct slice
-            #if data == self.data_table[0][0]:
-            #    # Show the first slice exploded with label
-            #    slc.setLabelVisible()
-            #    slc.setExploded()
-            #    slc.setExplodeDistanceFactor(0.5)
-
-        series.setPieSize(1)
-        chart.addSeries(series)
-
-        return chart
-
     def __load_vuln_data(self):
         return pd.read_csv('./temp/scan.csv')
     
@@ -272,7 +206,7 @@ class SystemStats(QWidget):
         for os in os_dict.keys():
             series.append(os + f': {os_dict[os]}', os_dict[os])
 
-        series.append('Unknown OS: 1', 1)
+        #series.append('Unknown OS: 1', 1)
         #for data in self.hosts['']:
         #    series.append(data[1], data[0].y())
         series.setPieSize(1)

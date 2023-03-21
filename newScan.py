@@ -14,6 +14,8 @@ import os
 import netScanner as netscanner
 import ipDiscoverer as ipdisc
 import json
+import ipDiscoverer as discoverer
+import re
 
 class ScanOptions(QWidget):
     def __init__(self):
@@ -123,6 +125,7 @@ class ScanOptions(QWidget):
         
         self.vuln_scan.save_api = QPushButton(container)
         self.vuln_scan.save_api.setText(u'Save API')
+        self.vuln_scan.save_api.clicked.connect(self.__save_shodan_api)
 
 
         self.cont_layout.addWidget(self.vuln_scan.scan_label)
@@ -219,10 +222,12 @@ class ScanOptions(QWidget):
         self.main_layout.addWidget(other_widget, 2, 0, 1, 1)
 
 
-    def __save_shodan_api(self, api):
+    def __save_shodan_api(self):
+        api = self.vuln_scan.api_input.text()
+
         dict = {'API': api}
-        with open('./temp/shodan.json', 'r') as outfile:
-            json.dump(dict, outfile)
+        with open('./temp/shodan.json', 'w') as file_json:
+            json.dump(dict, file_json)
     
     def __load_shodan_api(self):
         if (not os.path.exists('./temp/shodan.json')): return False
@@ -232,9 +237,12 @@ class ScanOptions(QWidget):
         return api['API']
 
     def host_discovery(self):
-        hosts = 'auto'
-        
-        if (not self.host_disc.network_cb.isChecked()): hosts = str(self.host_disc.network_input.text())
+        hosts = '127.0.0.1'
+        if (not self.host_disc.network_cb.isChecked()): 
+            hosts = str(self.host_disc.network_input.text())
+            if (not re.fullmatch('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$',hosts)): hosts = discoverer.get_network_local_IPV4()
+        else:
+            hosts = discoverer.get_network_local_IPV4()
 
         args = '' #argument string
         
@@ -252,9 +260,12 @@ class ScanOptions(QWidget):
 
     
     def vulnerability_scan(self):
-        hosts = 'auto'
-        if (not self.vuln_scan.network_cb.clicked): hosts = self.vuln_scan.network_input.text
-
+        hosts = '127.0.0.1'
+        if (not self.vuln_scan.network_cb.clicked): 
+            hosts = self.vuln_scan.network_input.text
+            if (not re.fullmatch('^\d{1,3}\.\d{1,3}\.\d{1,3}\.$',hosts)): hosts = discoverer.get_network_local_IPV4()
+        else:
+            hosts = discoverer.get_network_local_IPV4()
         args = ''
 
         print(hosts)

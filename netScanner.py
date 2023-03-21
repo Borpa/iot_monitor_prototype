@@ -43,7 +43,7 @@ def __load_scan_result_object():
         __save_object(scan_result, './temp/scan_result.pkl')
         return scan_result
 
-#TODO: save as a JSON/dict: OSs, ports and running services, device (manufactureres)
+#TODO: save as a JSON/dict: OSs, ports and running services, device (vendors)
 
 def get_vuln_scan_result():
     if (os.path.exists('./temp/scan_result.pkl')):
@@ -59,7 +59,7 @@ def get_host_scan_result():
     else:
         return None    
 
-def discover_hosts(network):
+def discover_hosts(network, args = "-sV -O"):
     #scan_result = __load_object('./temp/scan_result.pkl')
     #print(scan_result['192.168.3.12']['tcp'][135]) #-sU for UDP ports 
     #print(scan_result)
@@ -67,7 +67,7 @@ def discover_hosts(network):
 
     nm = nmap.PortScanner()
     host_list = nm.scan(hosts=network,
-                        arguments="-sV -O") #-oX <filename> -> XML format
+                        arguments=args) #-oX <filename> -> XML format
     #nm.scan(hosts=network, arguments="-sV -O -oX")
     #xml = nmap.nm.get_nmap_last_output()
     __save_object(host_list, './temp/hosts.pkl')
@@ -93,7 +93,7 @@ def scan_V6(hostS):
 def scan(hostS):
     #nm = nmap.PortScanner()
     #scan_range = nm.scan(hosts = hostS,
-    #                     arguments="-sV --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
+    #                     arguments="-sV -O --script vulscan/vulscan.nse --script-args vulscandb=allitems.csv")
     #scan_result = scan_range['scan']
     #__save_object(scan_result, './temp/scan_result.pkl')
     scan_result = __load_scan_result_object()
@@ -184,3 +184,6 @@ def scan(hostS):
 
 #scan result -> separate file for each host? or 1 big file
 # table: host ports os vendor
+
+#scan = get_host_scan_result()
+#print(scan['scan']['192.168.11.49']['osmatch'])

@@ -78,7 +78,7 @@ class CveBrower(QDialog):
         for url in url_list:
             urls += str(url) + '<br>'
 
-        qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \n\r Description:{desc}')
+        qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \nDescription:{desc}')
         #qtext.setText(f'{urls[0]} \n {urls[1]} urls nice')
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
