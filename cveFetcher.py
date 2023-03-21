@@ -37,25 +37,42 @@ def __get_HTML(source, cve):
 def get_CVE_info_from_NIST_JSON(cve):
     return json.dumps(get_CVE_info_from_NIST(cve), indent = 4)
 
+def get_CVSS_from_NIST(cve):
+    html = __get_HTML(source_nist, cve)
+    soup = BeautifulSoup(html, 'html.parser')
+    cvss_score3 = soup.find('a', attrs={'id': re.compile("^Cvss3")})
+    cvss_score2 = soup.find('a', attrs={'id': re.compile("^Cvss2")})
+    cvss_score = 'N/A'
+    scores = [cvss_score3, cvss_score2]
+    for score in scores:
+        if (score is not None and score.getText() != 'N/A'):
+            cvss_score = score.getText()
+            break
+
+    if (cvss_score != 'N/A'): cvss_score = cvss_score.split()[0]    
+    
+    res = dict({"CVSS": cvss_score})
+
+    return res
+
 def get_CVE_info_from_NIST(cve):
     html = __get_HTML(source_nist, cve)
     soup = BeautifulSoup(html, 'html.parser')
 
-    vuln_desc = soup.find('p', attrs={'data-testid': 'vuln-description'}).getText()
+    vuln_desc = soup.find('p', attrs={'data-testid': re.compile("description")}).getText()
     cvss_score3 = cvss_score2 = 'N/A'
     date_pub = soup.find('span', attrs={'data-testid': 'vuln-published-on'}).getText()
     date_mod = soup.find('span', attrs={'data-testid': 'vuln-last-modified-on'}).getText()
 
-    cvss_score3 = soup.find('a', attrs={'id': "Cvss3NistCalculatorAnchor"})
-    cvss_score3NA = soup.find('a', attrs={'id': "Cvss3NistCalculatorAnchorNA"})
-    cvss_score2 = soup.find('a', attrs={'id': "Cvss2CalculatorAnchor"})
+    cvss_score3 = soup.find('a', attrs={'id': re.compile("^Cvss3")})
+    cvss_score2 = soup.find('a', attrs={'id': re.compile("^Cvss2")})
+    cvss_score = 'N/A'
+    scores = [cvss_score3, cvss_score2]
 
-    if (cvss_score3 is not None and cvss_score3.getText() != 'N/A'): 
-        cvss_score = cvss_score3.getText()
-    elif (cvss_score3NA is not None and cvss_score3NA.getText() != 'N/A'):
-        cvss_score = cvss_score3NA.getText()
-    else:
-        cvss_score = cvss_score2.getText()
+    for score in scores:
+        if (score is not None and score.getText() != 'N/A'):
+            cvss_score = score.getText()
+            break
 
     if (cvss_score != 'N/A'): cvss_score = cvss_score.split()[0]    
     

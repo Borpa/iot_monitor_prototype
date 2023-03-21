@@ -78,7 +78,7 @@ class CveBrower(QDialog):
         info_mend = fetcher.get_CVE_info_from_Mend(item.text())
         lang = info_mend['Language']
 
-        qtext.setText(f'Rating: {cvss} \nDescription:{desc}\n{lang}\nPublished: {date_pub}\nLast Modified: {date_mod}')
+        qtext.setText(f'Rating: {cvss} \nDescription: {desc}\n{lang}\nPublished: {date_pub}\nLast Modified: {date_mod}')
         #qtext.setText(f'{urls[0]} \n {urls[1]} urls ')
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
