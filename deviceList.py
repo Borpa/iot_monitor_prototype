@@ -22,9 +22,6 @@ import os
 #TODO: move out the json init to other class 
 class DeviceList(QWidget):
     def __handle_double_clicked(self, slice):
-        #print(slice.label(), slice.value())
-        #print(self.current_device)
-
         bwr = browser(device=self.current_device, cvss_rating=slice.label())
         bwr.exec_()
 
@@ -77,7 +74,7 @@ class DeviceList(QWidget):
         qtext.setReadOnly(True)
 
         stats = self.__get_device_stats(item.text())
-        qtext.setPlainText(stats.to_string(col_space=30, justify='justify-all'))
+        qtext.setPlainText(stats)
 
         device_info_layout.addWidget(qtext, 1, 0)
         
@@ -152,7 +149,14 @@ class DeviceList(QWidget):
             #                           columns=cols), ignore_index=True)
 
         df = pd.DataFrame({'port': prt, 'state': state, 'name': name, 'product': product, 'version': version})
-        return df
+
+        df_string = df.to_string(col_space=30, justify='justify-all')
+
+        stats = self.__get_device_OS_vendor(device)
+
+        result = "OS: " + stats['os'] + "\nVendor" + stats['vendor'] + "\n" + df_string
+
+        return result
 
     def __get_device_OS_vendor(self, device):
         os = self.hosts[device]['osmatch']
@@ -262,13 +266,3 @@ class DeviceList(QWidget):
         chart.addSeries(series)
 
         return chart
-
-    def __vuln_list_item_clicked(widget, item):
-        vuln_desc = widget.__get_vuln_info(item.text())['description']
-        cve_widget = QWidget()
-        widget.info_layout.addWidget()
-
-    def __get_vuln_info(self, cve):
-        info = fetcher.get_CVE_details(cve)
-        score = fetcher.get_CVSS_score(cve)
-        return {'description': info, 'cvss score': score}

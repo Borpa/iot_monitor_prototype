@@ -70,7 +70,7 @@ class CveBrower(QDialog):
         qtext.setFixedHeight(400)
         qtext.setOpenExternalLinks(True)
         #qtext.setReadOnly(True)
-        desc = fetcher.get_CVE_details(item.text())
+        #desc = fetcher.get_CVE_details(item.text())
         
         url_list = fetcher.get_CVE_urls(item.text())
         urls = ''
@@ -78,8 +78,15 @@ class CveBrower(QDialog):
         for url in url_list:
             urls += str(url) + '<br>'
 
-        qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \nDescription:{desc}')
-        #qtext.setText(f'{urls[0]} \n {urls[1]} urls nice')
+        #qtext.setText(f'Rating: {fetcher.get_CVSS_score(item.text())} \nDescription:{desc}')
+        info = fetcher.get_CVE_info_from_Mend(item.text())
+        cvss = info['CVSS']
+        lang = info['Language']
+        desc = info['Description']
+        date = info['Date']
+
+        qtext.setText(f'Rating: {cvss} \nDescription:{desc}\n{lang}\n{date}')
+        #qtext.setText(f'{urls[0]} \n {urls[1]} urls ')
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         qtext.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
         self.main_layout.addWidget(qtext, 0, 1)
