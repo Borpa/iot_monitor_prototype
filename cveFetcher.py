@@ -13,6 +13,9 @@ from aiolimiter import AsyncLimiter
 source_cve = 'https://www.cve.org/CVERecord?id='
 source_cve_json = 'https://cveawg.mitre.org/api/cve/'
 source_nist = 'https://nvd.nist.gov/vuln/detail/'
+source_cvedetails = 'https://www.cvedetails.com/cve/'
+source_osv = 'https://osv.dev/vulnerability/'
+source_mend = 'https://www.mend.io/vulnerability-database/'
 
 def __get_HTML(url):
     response = requests.get(url)
@@ -77,7 +80,7 @@ def get_CVSS_score(cve):
 def get_CVE_details(cve):
     if (not __validate_CVE_format(cve)):
         raise Exception("Incorrect CVE format: ", cve)   
-    html = __get_HTML('https://www.cvedetails.com/cve/' + cve)
+    html = __get_HTML(source_cvedetails + cve)
     soup = BeautifulSoup(html, 'html.parser')
     try:
         cvss = soup.find('div', attrs={'class':"cvedetailssummary"}).getText()
@@ -88,7 +91,7 @@ def get_CVE_details(cve):
 def get_CVE_urls(cve):
     if (not __validate_CVE_format(cve)):
         raise Exception("Incorrect CVE format: ", cve)   
-    html = __get_HTML('https://www.cvedetails.com/cve/' + cve)
+    html = __get_HTML(source_cvedetails + cve)
     soup = BeautifulSoup(html, 'html.parser')
     try:
         urls = soup.findAll('a', attrs={'title':"External url"})
