@@ -114,7 +114,8 @@ class DeviceList(QWidget):
 
         stats = netscanner.get_vuln_scan_result()
         stats = stats[device]
-        port_types = ['tcp', 'udp']
+        #port_types = ['tcp', 'udp']
+        port_types = ['tcp']
         for port_type in port_types:
             ports = stats[port_type].keys()
 

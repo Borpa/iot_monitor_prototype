@@ -1,20 +1,9 @@
-import sys
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainter, QPalette
-from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
-    QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit, QListWidget, QDialog, QPlainTextEdit, QTextBrowser)
-from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
-                              QLineSeries, QPieSeries, QScatterSeries,
-                              QSplineSeries, QStackedBarSeries)
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QGridLayout, QListWidget, QDialog, QTextBrowser
+from PySide6 import QtGui
 
 import cveFetcher as fetcher
-import netScanner as netscanner
-import pandas as pd
 import json
-import ast
-import os
 
 class CveBrower(QDialog):
     def __init__(self, device, cvss_rating):

@@ -163,7 +163,8 @@ class SystemStats(QWidget):
         hosts = self.hosts['scan'].keys()
         ports_dict = dict()
 
-        port_types = ['tcp', 'udp']
+        #port_types = ['tcp', 'udp']
+        port_types = ['tcp']
 
         for host in hosts:
             for port_type in port_types:

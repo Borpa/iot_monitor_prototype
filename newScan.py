@@ -1,18 +1,10 @@
-import netScanner as netscanner
-import sys
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QColor, QPainter, QPalette, QFont
-from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
-    QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel, QTabWidget,
-    QFormLayout, QLineEdit, QListWidget, QCheckBox, QRadioButton, QButtonGroup, QComboBox)
-from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
-                              QLineSeries, QPieSeries, QScatterSeries,
-                              QSplineSeries, QStackedBarSeries)
-from PySide6 import QtGui, QtCore
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel,
+    QFormLayout, QLineEdit, QCheckBox, QRadioButton, QComboBox)
 
 import os
 import netScanner as netscanner
-import ipDiscoverer as ipdisc
 import json
 import ipDiscoverer as discoverer
 import re
@@ -251,7 +243,7 @@ class ScanOptions(QWidget):
 
         print(hosts + ' ' + args)
 
-        #netscanner.discover_hosts(hosts, args)        
+        netscanner.discover_hosts_placeholder(hosts, args)        
 
         #input network adress: input host adresses manually / auto detection
         #IP: IPv4 / IPv6 (not implemented)
@@ -270,7 +262,7 @@ class ScanOptions(QWidget):
 
         print(hosts)
 
-        #netscanner.scan(hosts)
+        netscanner.scan_placeholder(hosts)
 
         #Form
         #input network adress: input host adresses manually / auto detection
