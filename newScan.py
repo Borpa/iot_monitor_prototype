@@ -1,13 +1,37 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, QSize, QRect, QObject, QPropertyAnimation
+from PySide6.QtGui import QFont, QMovie
 from PySide6.QtWidgets import (QWidget, QGridLayout, QPushButton, QHBoxLayout, QLabel,
-    QFormLayout, QLineEdit, QCheckBox, QRadioButton, QComboBox)
+    QFormLayout, QLineEdit, QCheckBox, QRadioButton, QComboBox, QMessageBox)
 
 import os
 import netScanner as netscanner
 import json
 import ipDiscoverer as discoverer
 import re
+import multiprocessing as mp
+
+def hostscan(hosts, args):
+    netscanner.discover_hosts_placeholder(hosts, args)
+
+def vulnscan(hosts, args):
+    netscanner.scan_placeholder(hosts, args)
+
+class LoadingStatus(QMessageBox):
+    def __init__(self):
+        super().__init__()
+        self.label = QLabel(self)
+
+        self.movie = QMovie('./images/loading.gif')
+        self.label.setMovie(self.movie)
+        self.label.resize(10,10)
+        self.startAnim()
+    
+    def startAnim(self):
+        self.movie.start()
+
+    def stopAnim(self):
+        self.movie.stop()
+        self.label.setText('Done')
 
 class ScanOptions(QWidget):
     def __init__(self):
@@ -196,8 +220,10 @@ class ScanOptions(QWidget):
         other_widget.save_sett.setText(u'Save settings')
         other_widget.button_update = QPushButton()
         other_widget.button_update.setText(u'Update vulnerability databases')
+        other_widget.button_update.clicked.connect(self.update_cve_db)
         other_widget.button_cache = QPushButton()
         other_widget.button_cache.setText(u'Clear cache')
+        other_widget.button_cache.clicked.connect(self.clear_cache)
 
         container = QWidget()
         self.cont_layout = QHBoxLayout()
@@ -220,6 +246,11 @@ class ScanOptions(QWidget):
         dict = {'API': api}
         with open('./temp/shodan.json', 'w') as file_json:
             json.dump(dict, file_json)
+
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Notification")
+        dlg.setText("Saved")
+        dlg.exec_() 
     
     def __load_shodan_api(self):
         if (not os.path.exists('./temp/shodan.json')): return False
@@ -227,6 +258,8 @@ class ScanOptions(QWidget):
         with open (f'./temp/shodan.json', 'r') as file_json:
             api = json.load(file_json)
         return api['API']
+
+
 
     def host_discovery(self):
         hosts = '127.0.0.1'
@@ -241,16 +274,35 @@ class ScanOptions(QWidget):
         if (self.host_disc.service_detection_cb.isChecked()): args = args + '-sV' + ' ' 
         if (self.host_disc.os_detection_cb.isChecked()): args = args + '-O' + ' '
 
-        print(hosts + ' ' + args)
+        if __name__== 'newScan':
+            print(hosts + ' ' + args)
+            context = mp.get_context('spawn')
+            process = context.Process(target=hostscan, args=(hosts, args))
+            #loading = LoadingStatus()
+            #loading.setStyleSheet("QLabel{min-width: 200px; min-height: 180px;}")
+            #loading.exec_()
+            process.start()
+            #while (process.is_alive):
+            #    continue
+            #process.join()
+            #loading.stopAnim() 
+            #loading.close() 
+            #Notification  
+            
+            #dlg = QMessageBox(self)
+            #dlg.setWindowTitle("Notification")
+            #dlg.setText("Host discovery complete")
+            #dlg.exec_()    
 
-        netscanner.discover_hosts_placeholder(hosts, args)        
+
 
         #input network adress: input host adresses manually / auto detection
         #IP: IPv4 / IPv6 (not implemented)
         #Enable OS detection? 
         #Enable port service discovery?
 
-    
+
+
     def vulnerability_scan(self):
         hosts = '127.0.0.1'
         if (not self.vuln_scan.network_cb.clicked): 
@@ -262,7 +314,12 @@ class ScanOptions(QWidget):
 
         print(hosts)
 
-        netscanner.scan_placeholder(hosts)
+        #netscanner.scan_placeholder(hosts)
+
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Notification")
+        dlg.setText("Vulnerability scan complete")
+        dlg.exec_() 
 
         #Form
         #input network adress: input host adresses manually / auto detection
@@ -279,13 +336,21 @@ class ScanOptions(QWidget):
         #>CVE - CVSS 
         return None
     
-    def update_cve_db():
+    def update_cve_db(self):
         #https://www.cve.org/Downloads
         #https://scipag.github.io/vulscan/
-        return None
+        
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Notification")
+        dlg.setText("Update complete")
+        dlg.exec_() 
 
-    def clear_cache():
+    def clear_cache(self):
         for filename in os.listdir('./temp/'):
             if (filename == 'cve-cvss-db.csv'): continue
             #os.remove(filename)
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Notification")
+        dlg.setText("Cache cleared")
+        dlg.exec_() 
 
