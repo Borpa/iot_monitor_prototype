@@ -1,18 +1,20 @@
 import sys
-import os
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6 import QtGui
 
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import (QApplication, QLabel, QPushButton,
-                               QVBoxLayout, QWidget)
-from PySide6.QtCharts import QChart, QChartView, QPieSeries
+from Iot_monitor import SystemStats
 
 if __name__ == "__main__":
-    app = QGuiApplication(sys.argv)
-    engine = QQmlApplicationEngine()
-    engine.load(os.path.join(os.path.dirname(__file__), "qml/main.qml"))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
+    app = QApplication(sys.argv)
+    window = QMainWindow()
+    window.setWindowTitle('Iot monitor')
+    window.setWindowIcon(QtGui.QIcon('./images/logo_new.png'))
+    widget = SystemStats()
+    window.setCentralWidget(widget)
+    available_geometry = window.screen().availableGeometry()
+    width = available_geometry.width()
+    height = available_geometry.height()
+    window.setMinimumSize(width * 0.5, height * 0.5)
+    window.setFixedSize(width * 0.8, height * 0.85)
+    window.show()
     sys.exit(app.exec())
