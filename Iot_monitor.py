@@ -138,22 +138,26 @@ class SystemStats(QWidget):
             return
 
         if (self.vulns != None):
-            hosts = self.vulns.keys()
+            hosts = self.vulns
         else:
-            hosts = self.hosts['scan'].keys()
+            hosts = self.hosts['scan']
 
         chart = QChart()
         chart.setTitle("Vendors")
         series = QPieSeries(chart)
         vendor_dict = dict()
 
-        for host in hosts:
+        for host in hosts.keys():
             try:
                 vendor = hosts[host]['vendor']
             except:
                 vendor = 'Unknown vendor'
             if (vendor == {}):
                 vendor = 'Unknown vendor'
+
+            if (type(vendor) == dict):
+                key = list(vendor.keys())[0]
+                vendor = vendor[key]
 
             if (vendor in vendor_dict.keys()):
                 vendor_dict[vendor] += 1
@@ -187,9 +191,7 @@ class SystemStats(QWidget):
         for host in hosts.keys():
             for port_type in port_types:
                 try:
-                    print(hosts.values)
                     port_list = hosts[str(host)][port_type].keys()
-                    print(port_list)
                 except:
                     continue
 
@@ -214,16 +216,16 @@ class SystemStats(QWidget):
             return
 
         if (self.vulns != None):
-            hosts = self.vulns.keys()
+            hosts = self.vulns
         else:
-            hosts = self.hosts['scan'].keys()
+            hosts = self.hosts['scan']
 
         chart = QChart()
         chart.setTitle("OS")
         series = QPieSeries(chart)
         os_dict = dict()
 
-        for host in hosts:
+        for host in hosts.keys():
             try:
                 os = hosts[host]['osmatch'][0]['name']
             except:

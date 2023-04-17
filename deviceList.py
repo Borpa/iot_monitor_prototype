@@ -152,7 +152,23 @@ class DeviceList(QWidget):
 
         # stats = self.__get_device_OS_vendor(device)
 
-        stats = {'os': 'Windows 10', 'vendor': 'Lenovo'}
+        try:
+            os = stats['osmatch'][0]['name']
+        except:
+            os = 'Unknown OS'
+
+        try:
+            vendor = stats['vendor']
+        except:
+            vendor = 'Unknown vendor'
+        if (vendor == {}):
+            vendor = 'Unknown vendor'
+
+        if (type(vendor) == dict):
+            key = list(vendor.keys())[0]
+            vendor = vendor[key]
+        # stats = {'os': os, 'vendor': 'Lenovo'}
+        stats = {'os': os, 'vendor': vendor}
 
         result = "OS: " + stats['os'] + ", Vendor: " + \
             stats['vendor'] + "\n" + df_string
