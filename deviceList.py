@@ -71,6 +71,9 @@ class DeviceList(QWidget):
                                      QSizePolicy.Ignored)
 
             chart_view.chart().legend().setAlignment(Qt.AlignRight)
+        else:
+            chart = None
+            chart_view = QChartView(chart)
 
         device_info = QWidget(self)
         device_info_layout = QGridLayout()
@@ -104,21 +107,6 @@ class DeviceList(QWidget):
         # self.main_layout.addWidget(desc, 1, 2)
         self.main_layout.addWidget(device_info, 0, 1)
 
-    def __create_cve_list_widget(self, device):
-        list_widget = QListWidget(self)
-        df = pd.read_csv('./temp/scan.csv')
-        cve_list = df['CVE'].loc[df['host'] == device].values
-        cve_list = str(cve_list[0])
-        cve_list = ast.literal_eval(cve_list)
-        for cve in cve_list:
-            list_widget.addItem(cve)
-        list_widget.itemClicked.connect(self.__cve_list_item_clicked)
-
-        return list_widget
-
-    def __cve_list_item_clicked(self, item):
-        return None
-
     def __get_device_stats(self, device):
         # df = pd.read_csv('./temp/scan.csv')
         # stats = df.loc[df['host'] == device]
@@ -126,12 +114,23 @@ class DeviceList(QWidget):
         # stats = self.hosts[device]
         # ports = stats['tcp'].keys()
 
-        stats = netscanner.get_vuln_scan_result()
+        if (netscanner.get_vuln_scan_result() == None and netscanner.get_host_scan_result() == None):
+            return
+
+        if (netscanner.get_vuln_scan_result() == None):
+            stats = netscanner.get_host_scan_result()
+            stats = stats['scan']
+        else:
+            stats = netscanner.get_vuln_scan_result()
+
         stats = stats[device]
-        # port_types = ['tcp', 'udp']
-        port_types = ['tcp']
+        port_types = ['tcp', 'udp']
+
         for port_type in port_types:
-            ports = stats[port_type].keys()
+            try:
+                ports = stats[port_type].keys()
+            except:
+                continue
 
             prt = []
             state = []
@@ -159,24 +158,6 @@ class DeviceList(QWidget):
             stats['vendor'] + "\n" + df_string
 
         return result
-
-    def __get_device_OS_vendor(self, device):
-        os = self.hosts[device]['osmatch']
-        vendor = self.hosts[device]['vendor']
-        return {'os': os, 'vendor': vendor}
-
-    def __create_device_info_widget(self, device):
-        device_info = QWidget(self)
-        info_layout = QGridLayout()
-        device_info.setLayout(info_layout)
-
-        piechart = self.__get_cvss_pie_chart(device)
-
-        info_layout.addWidget(piechart, 0, 0)
-
-        cve_list = QListWidget(device_info)
-
-        return None
 
     def __get_cvss_pie_chart(self, device):
         chart = QChart()

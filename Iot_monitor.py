@@ -137,7 +137,7 @@ class SystemStats(QWidget):
         if (self.hosts == None and self.vulns == None):
             return
 
-        if (self.vulns == None):
+        if (self.vulns != None):
             hosts = self.vulns.keys()
         else:
             hosts = self.hosts['scan'].keys()
@@ -145,12 +145,11 @@ class SystemStats(QWidget):
         chart = QChart()
         chart.setTitle("Vendors")
         series = QPieSeries(chart)
-        # hosts = self.hosts['scan'].keys()
         vendor_dict = dict()
 
         for host in hosts:
             try:
-                vendor = self.hosts['scan'][host]['vendor']
+                vendor = hosts[host]['vendor']
             except:
                 vendor = 'Unknown vendor'
             if (vendor == {}):
@@ -173,26 +172,29 @@ class SystemStats(QWidget):
         if (self.hosts == None and self.vulns == None):
             return
 
-        if (self.vulns == None):
-            hosts = self.vulns.keys()
+        if (self.vulns != None):
+            hosts = self.vulns
         else:
-            hosts = self.hosts['scan'].keys()
+            hosts = self.hosts['scan']
 
         chart = QChart()
         chart.setTitle("Open ports")  # services?
         series = QPieSeries(chart)
-        # hosts = self.hosts['scan'].keys()
         ports_dict = dict()
 
-        # port_types = ['tcp', 'udp']
-        port_types = ['tcp']
+        port_types = ['tcp', 'udp']
 
-        for host in hosts:
+        for host in hosts.keys():
             for port_type in port_types:
-                port_list = self.hosts['scan'][host][port_type].keys()
+                try:
+                    print(hosts.values)
+                    port_list = hosts[str(host)][port_type].keys()
+                    print(port_list)
+                except:
+                    continue
 
                 for port in port_list:
-                    if (self.hosts['scan'][host][port_type][port]['state'] == 'open'):
+                    if (hosts[host][port_type][port]['state'] == 'open'):
                         openport = str(port) + '/' + port_type
 
                         if (openport in ports_dict.keys()):
@@ -211,7 +213,7 @@ class SystemStats(QWidget):
         if (self.hosts == None and self.vulns == None):
             return
 
-        if (self.vulns == None):
+        if (self.vulns != None):
             hosts = self.vulns.keys()
         else:
             hosts = self.hosts['scan'].keys()
@@ -219,11 +221,11 @@ class SystemStats(QWidget):
         chart = QChart()
         chart.setTitle("OS")
         series = QPieSeries(chart)
-        # hosts = self.hosts['scan'].keys()
         os_dict = dict()
+
         for host in hosts:
             try:
-                os = self.hosts['scan'][host]['osmatch'][0]['name']
+                os = hosts[host]['osmatch'][0]['name']
             except:
                 os = 'Unknown OS'
 
