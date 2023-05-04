@@ -68,7 +68,7 @@ class ScanOptions(QWidget):
         self.host_disc.service_detection_cb = QCheckBox(self.host_disc)
         self.host_disc.service_detection_cb.setChecked(True)
         self.host_disc.service_detection_cb.setText(
-            u'Detect ports and services')
+            self.tr('Detect ports and services'))
 
         host_disc_layout.addRow(self.host_disc.label)
         host_disc_layout.addRow(

@@ -59,6 +59,11 @@
         <translation> Обнаружение ОС </translation>
     </message>
     <message>
+        <location filename="newScan.py" line="71"/>
+        <source>Detect ports and services</source>
+        <translation>Обнаружение портов и сервисов</translation>
+    </message>
+    <message>
         <location filename="newScan.py" line="84"/>
         <location filename="newScan.py" line="195"/>
         <source>Network/hosts address</source>
