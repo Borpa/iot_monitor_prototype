@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 import os
 import cve_cvss_dbCreator as dbcreator
+import shodan
 
 
 def __save_object(obj, filename):
@@ -77,7 +78,7 @@ def scan_V6(hostS):
     return None
 
 
-def vuln_scan(hostS, args='-O'):
+def vuln_scan(hostS, args='-O', scanner='--script vulscan/vulscan.nse --script-args vulscandb=allitems.csv'):
     nm = nmap.PortScanner()
     args += '-sV -sS -sU'
     scan_range = nm.scan(hosts=hostS,
@@ -173,6 +174,53 @@ def scan_placeholder(hostS, args):
     df[col].to_json("./temp/scan.json")
     # __create_cve_cvss_db(df['CVE'].values)
     return df
+
+
+def shodan_vuln_scan(hosts, user_api):
+    api = shodan.Shodan(user_api)
+    # result = api.search(hosts)
+
+    col = ['host', 'vendor', 'os', 'ports', 'CVE']
+
+    df = pd.DataFrame(columns=col)
+    df.index.name = 'id'
+    df['CVE'] = df['CVE'].astype(object)
+
+    i = 0
+    for hostIP in hosts:
+        host = api.host(hostIP)
+        # print("IP: %s" % host['ip_str'])
+        ip = host['ip_str']
+        vendor = host.get('org', 'n/a')
+        os = host.get('os', 'n/a')
+
+        # print("Organization: %s" % host.get('org', 'n/a'))
+        # print("Operating System: %s" % host.get('os', 'n/a'))
+        ports = []
+        for item in host['data']:
+            port = item['port']
+            port_data = item['data']
+            ports.append({port: port_data})
+            # print("Port: %s" % item['port'])
+            # print("Banner: %s" % item['data'])
+
+        CVE = []
+        for item in host['vulns']:
+            CVE.append(item.replace('!', ''))
+
+        df.at[i, 'host'] = ip
+        df.at[i, 'os'] = os
+        df.at[i, 'vendor'] = vendor
+        df.at[i, 'ports'] = ports
+        df.at[i, 'CVE'] = CVE
+        i += 1
+
+    df[col].to_csv("./temp/shodan_scan.csv")
+    # print('Vulns: %s' % item)
+#            exploits = api.exploits.search(CVE)
+#            for item in exploits['matches']:
+#                if item.get('cve')[0] == CVE:
+#                    print(item.get('description'))
 
 
 # print(scan('192.168.3.1'))

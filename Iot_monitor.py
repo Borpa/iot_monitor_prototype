@@ -59,9 +59,9 @@ class SystemStats(QWidget):
         device_list = DeviceList()
         new_scan = ScanOptions()
 
-        tab.addTab(system_stats_page, 'System stats')
-        tab.addTab(device_list, 'Device list')
-        tab.addTab(new_scan, 'New scan')
+        tab.addTab(system_stats_page, self.tr('System stats'))
+        tab.addTab(device_list, self.tr('Device list'))
+        tab.addTab(new_scan, self.tr('New scan'))
 
         main_layout.addWidget(tab, 0, 0, 2, 1)
 
@@ -99,7 +99,7 @@ class SystemStats(QWidget):
 
     def __create_vuln_pie_chart(self):
         chart = QChart()
-        chart.setTitle("Vulnerabilities, CVSS Scores")
+        chart.setTitle(self.tr('Vulnerabilities, CVSS Scores'))
         series = QPieSeries(chart)
         df_cvss = pd.read_csv('./temp/cve-cvss-db.csv')
         low = med = high = crit = 0
@@ -143,7 +143,7 @@ class SystemStats(QWidget):
             hosts = self.hosts['scan']
 
         chart = QChart()
-        chart.setTitle("Vendors")
+        chart.setTitle(self.tr('Vendors'))
         series = QPieSeries(chart)
         vendor_dict = dict()
 
@@ -151,9 +151,9 @@ class SystemStats(QWidget):
             try:
                 vendor = hosts[host]['vendor']
             except:
-                vendor = 'Unknown vendor'
+                vendor = self.tr('Unknown vendor')
             if (vendor == {}):
-                vendor = 'Unknown vendor'
+                vendor = self.tr('Unknown vendor')
 
             if (type(vendor) == dict):
                 key = list(vendor.keys())[0]
@@ -182,7 +182,7 @@ class SystemStats(QWidget):
             hosts = self.hosts['scan']
 
         chart = QChart()
-        chart.setTitle("Open ports")  # services?
+        chart.setTitle(self.tr('Open ports'))  # services?
         series = QPieSeries(chart)
         ports_dict = dict()
 
@@ -221,7 +221,7 @@ class SystemStats(QWidget):
             hosts = self.hosts['scan']
 
         chart = QChart()
-        chart.setTitle("OS")
+        chart.setTitle(self.tr('OS'))
         series = QPieSeries(chart)
         os_dict = dict()
 
@@ -229,7 +229,7 @@ class SystemStats(QWidget):
             try:
                 os = hosts[host]['osmatch'][0]['name']
             except:
-                os = 'Unknown OS'
+                os = self.tr('Unknown OS')
 
             if (os in os_dict.keys()):
                 os_dict[os] += 1

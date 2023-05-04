@@ -145,8 +145,8 @@ class DeviceList(QWidget):
                 version.append(stats[port_type][port]['version'])
                 prt.append(str(port) + '/' + port_type)
 
-        df = pd.DataFrame({'port': prt, 'state': state,
-                          'name': name, 'product': product, 'version': version})
+        df = pd.DataFrame({self.tr('port'): prt, self.tr('state'): state,
+                          self.tr('name'): name, self.tr('product'): product, self.tr('version'): version})
 
         df_string = df.to_string(col_space=30, justify='justify-all')
 
@@ -155,14 +155,14 @@ class DeviceList(QWidget):
         try:
             os = stats['osmatch'][0]['name']
         except:
-            os = 'Unknown OS'
+            os = self.tr('Unknown OS')
 
         try:
             vendor = stats['vendor']
         except:
-            vendor = 'Unknown vendor'
+            vendor = self.tr('Unknown vendor')
         if (vendor == {}):
-            vendor = 'Unknown vendor'
+            vendor = self.tr('Unknown vendor')
 
         if (type(vendor) == dict):
             key = list(vendor.keys())[0]
@@ -177,7 +177,8 @@ class DeviceList(QWidget):
 
     def __get_cvss_pie_chart(self, device):
         chart = QChart()
-        chart.setTitle("Vulnerabilities, CVSS scores - {}".format(device))
+        chart.setTitle(
+            self.tr('Vulnerabilities, CVSS scores - {}').format(device))
 
         series = QPieSeries(chart)
 
