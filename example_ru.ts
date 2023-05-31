@@ -51,7 +51,7 @@
         <location filename="newScan.py" line="60"/>
         <location filename="newScan.py" line="101"/>
         <source>Discover hosts</source>
-        <translation> Обнаружение хостов </translation>
+        <translation> Обнаружение устройств </translation>
     </message>
     <message>
         <location filename="newScan.py" line="67"/>
@@ -67,7 +67,7 @@
         <location filename="newScan.py" line="84"/>
         <location filename="newScan.py" line="195"/>
         <source>Network/hosts address</source>
-        <translation>Адрес сети/хостов</translation>
+        <translation>Адрес сети/устройств</translation>
     </message>
     <message>
         <location filename="newScan.py" line="86"/>
